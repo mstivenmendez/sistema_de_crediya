@@ -50,7 +50,7 @@ public int Guardar(Cliente entity, String sql) {
          entity.setApellido2(validar.ValidarOpcional(insertar.Apellido2()));
          entity.setDocumento(validar.ValidarDocumento(insertar.Cedula()));
          entity.setTelefono(validar.ValidarTelefonoU(insertar.Telefono())); // Corregido: usar ValidarTelefonoU
-         
+
          // Validar y convertir la fecha de nacimiento UNA SOLA VEZ
          String fechaNacimientoStr = insertar.FechaNacimiento();
          LocalDate fechaNacimiento = validar.ValidarFechaNacimiento(fechaNacimientoStr);
@@ -59,7 +59,7 @@ public int Guardar(Cliente entity, String sql) {
             JOptionPane.showMessageDialog(null, "Fecha de nacimiento no válida. No se guardará el cliente.");
             return; // Si la fecha es inválida, no continuar con el guardado
          }
-         
+
          entity.setFechaNacimiento(fechaNacimiento);
 
          // Configurar los parámetros del PreparedStatement
@@ -70,12 +70,12 @@ public int Guardar(Cliente entity, String sql) {
          ps.setString(5, entity.getDocumento());
          ps.setString(6, entity.getTelefono());
          ps.setObject(7, entity.getFechaNacimiento()); // LocalDate se maneja con setObject
-         
+
       } catch (SQLException e) {
          throw new RuntimeException(e);
       }
    });
-   
+
    if (resultado > 0) {
       JOptionPane.showMessageDialog(null, "Guardó Usuario Correctamente");
    }
@@ -90,6 +90,7 @@ public int Guardar(Cliente entity, String sql) {
 
    @Override
    public List<Cliente> Buscar() {
+      return null;
    }
 
    @Override
