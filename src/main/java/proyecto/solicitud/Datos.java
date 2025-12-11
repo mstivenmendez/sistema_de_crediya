@@ -13,14 +13,14 @@ public class Datos {
    public String Nombre2() {
       String nombre = JOptionPane.showInputDialog(null,
          " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
-         "Ingrese el nombre \n");
+         "Ingrese el 2do nombre(opcional) \n");
       return nombre;
    }
 
    public String Usuario() {
       String usuario = JOptionPane.showInputDialog(null,
          " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
-         "Ingrese el usuario \n" +
+         "Ingrese el Nombre de usuario \n" +
          "Solo se permiten letras y números\n" +
          "Sin espacios ni caracteres especiales\n" +
          "Ejemplo: Usuario123");
@@ -37,7 +37,7 @@ public class Datos {
    public String Apellido2() {
       String apellido = JOptionPane.showInputDialog(null,
          " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
-         "Ingrese el apellido \n");
+         "Ingrese el 2do apellido (opcional)\n");
       return apellido;
    }
 
@@ -50,13 +50,14 @@ public class Datos {
             "- Al menos una letra mayúscula\n" +
             "- Al menos una letra minúscula\n" +
             "- Al menos un número\n" +
-            "- Al menos un carácter especial (!@#$%^&*)");
+            "- Al menos un carácter especial (!@#$%^&*.)");
       return password;
    }
 
    public String Cedula() {
       String cedula = JOptionPane.showInputDialog(null,
          " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
+         "POr favor ingrese su numero de documento\n" +
          "Debe contener solo números\n" +
          "Sin espacios ni letras\n" +
          "Entre 7 y 11 dígitos\n" +
@@ -81,6 +82,14 @@ public class Datos {
          "Sin letras ni signos\n" +
          "Ejemplo: 3001234567");
       return telefono;
+   }
+
+   public String FechaNacimiento() {
+      String fechaNacimiento = JOptionPane.showInputDialog(null,
+            " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
+            "Ingrese la fecha de nacimiento (Formato: yyyy-MM-dd) \n" +
+            "Ejemplo: 1995-04-23");
+      return fechaNacimiento;
    }
 
    public String IdPrestamo() {

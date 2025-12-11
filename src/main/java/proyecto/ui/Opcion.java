@@ -1,4 +1,4 @@
-package proyecto.vista;
+package proyecto.ui;
 
 import javax.swing.JOptionPane;
 import proyecto.validaciones.ValidarNumero;
