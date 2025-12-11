@@ -1,23 +1,29 @@
 package proyecto.ui;
 
 import javax.swing.JOptionPane;
+
+import proyecto.crud.ClienteCrud;
+import proyecto.personal.Cliente;
 import proyecto.validaciones.ValidarNumero;
 
 public class Opcion {
    Menu ingreso = new Menu();
    ValidarNumero numero = new ValidarNumero();
 
-   public void VistaSesionOpcion(int valor){
+   public void VistaSesionOpcion(int valor) {
       switch (valor) {
          case 1:
             var opcion = ingreso.VistaInicio();
-            int resultado = numero.solicitarEntero(opcion,2);
+            int resultado = numero.solicitarEntero(opcion, 2);
             VistaInicioOpcion(resultado);
             ///////////////
-            VistaInicioOpcion(numero.solicitarEntero(ingreso.VistaInicio(),2));
+            VistaInicioOpcion(numero.solicitarEntero(ingreso.VistaInicio(), 2));
             break;
          case 2:
-            JOptionPane.showMessageDialog(null, "Registro");
+            ClienteCrud clienteCrud = new ClienteCrud();
+            Cliente cliente = new Cliente();
+            clienteCrud.Guardar(cliente,
+                  "INSERT INTO informacion (primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, documento, telefono, fecha_nacimiento) VALUES (?, ?, ?, ?, ?, ?,?)");
             break;
          case 0:
             JOptionPane.showMessageDialog(null, "Saliendo del Programa...");
@@ -25,20 +31,22 @@ public class Opcion {
       }
    }
 
-   public void VistaInicioOpcion(Integer valor){
-      if(valor == null) return;
+   public void VistaInicioOpcion(Integer valor) {
+      if (valor == null)
+         return;
 
       switch (valor) {
          case 1:
-            VistaUsuarioOpcion(numero.solicitarEntero(ingreso.VistaUsuario(),7));
+            VistaUsuarioOpcion(numero.solicitarEntero(ingreso.VistaUsuario(), 7));
             break;
          case 2:
             // Bucle para mantener en el menú de administrador
             boolean continuarAdmin = true;
-            while(continuarAdmin) {
-               Integer opcionAdmin = numero.solicitarEntero(ingreso.VistaAdministrador(),5);
-               if(opcionAdmin == null) continue;
-               if(opcionAdmin == 0) {
+            while (continuarAdmin) {
+               Integer opcionAdmin = numero.solicitarEntero(ingreso.VistaAdministrador(), 5);
+               if (opcionAdmin == null)
+                  continue;
+               if (opcionAdmin == 0) {
                   JOptionPane.showMessageDialog(null, "Regresando al menú principal...");
                   continuarAdmin = false;
                } else {
@@ -52,13 +60,14 @@ public class Opcion {
       }
    }
 
-   public void VistaUsuarioOpcion(Integer valor){
-      if(valor == null) return;
+   public void VistaUsuarioOpcion(Integer valor) {
+      if (valor == null)
+         return;
 
       // Bucle para mantener en el menú de usuario
       boolean continuarUsuario = true;
-      while(continuarUsuario) {
-         if(valor == 0) {
+      while (continuarUsuario) {
+         if (valor == 0) {
             JOptionPane.showMessageDialog(null, "Regresando al menú principal...");
             continuarUsuario = false;
          } else {
@@ -87,20 +96,22 @@ public class Opcion {
             }
             // Pedir siguiente opción
             valor = numero.solicitarEntero(ingreso.VistaUsuario(), 7);
-            if(valor == null) continue;
+            if (valor == null)
+               continue;
          }
       }
    }
 
-   public void VistaAdministradorOpcion(int valor){
+   public void VistaAdministradorOpcion(int valor) {
       switch (valor) {
          case 1:
             // Bucle para gestión de empleados
             boolean continuarEmpleado = true;
-            while(continuarEmpleado) {
+            while (continuarEmpleado) {
                Integer opcion = numero.solicitarEntero(ingreso.VistaEmpleado(), 4);
-               if(opcion == null) continue;
-               if(opcion == 0) {
+               if (opcion == null)
+                  continue;
+               if (opcion == 0) {
                   JOptionPane.showMessageDialog(null, "Regresando al menú de administrador...");
                   continuarEmpleado = false;
                } else {
@@ -111,10 +122,11 @@ public class Opcion {
          case 2:
             // Bucle para gestión de clientes
             boolean continuarClientes = true;
-            while(continuarClientes) {
+            while (continuarClientes) {
                Integer opcion = numero.solicitarEntero(ingreso.VistaGestionClientes(), 3);
-               if(opcion == null) continue;
-               if(opcion == 0) {
+               if (opcion == null)
+                  continue;
+               if (opcion == 0) {
                   JOptionPane.showMessageDialog(null, "Regresando al menú de administrador...");
                   continuarClientes = false;
                } else {
@@ -125,10 +137,11 @@ public class Opcion {
          case 3:
             // Bucle para gestión de préstamos
             boolean continuarPrestamos = true;
-            while(continuarPrestamos) {
+            while (continuarPrestamos) {
                Integer opcion = numero.solicitarEntero(ingreso.VistaGestionPrestamos(), 3);
-               if(opcion == null) continue;
-               if(opcion == 0) {
+               if (opcion == null)
+                  continue;
+               if (opcion == 0) {
                   JOptionPane.showMessageDialog(null, "Regresando al menú de administrador...");
                   continuarPrestamos = false;
                } else {
@@ -139,10 +152,11 @@ public class Opcion {
          case 4:
             // Bucle para gestión de pagos
             boolean continuarPagos = true;
-            while(continuarPagos) {
+            while (continuarPagos) {
                Integer opcion = numero.solicitarEntero(ingreso.VistaGestionPagos(), 3);
-               if(opcion == null) continue;
-               if(opcion == 0) {
+               if (opcion == null)
+                  continue;
+               if (opcion == 0) {
                   JOptionPane.showMessageDialog(null, "Regresando al menú de administrador...");
                   continuarPagos = false;
                } else {
@@ -153,10 +167,11 @@ public class Opcion {
          case 5:
             // Bucle para gestión de reportes
             boolean continuarReportes = true;
-            while(continuarReportes) {
+            while (continuarReportes) {
                Integer opcion = numero.solicitarEntero(ingreso.VistaGestionReportes(), 5);
-               if(opcion == null) continue;
-               if(opcion == 0) {
+               if (opcion == null)
+                  continue;
+               if (opcion == 0) {
                   JOptionPane.showMessageDialog(null, "Regresando al menú de administrador...");
                   continuarReportes = false;
                } else {
@@ -167,7 +182,7 @@ public class Opcion {
       }
    }
 
-   public void VistaAdministradorEmpledaoOpcion(int valor){
+   public void VistaAdministradorEmpledaoOpcion(int valor) {
       switch (valor) {
          case 1:
             JOptionPane.showMessageDialog(null, "Registrar empleado");
@@ -184,7 +199,7 @@ public class Opcion {
       }
    }
 
-   public void VistaGestionClientesOpcion(int valor){
+   public void VistaGestionClientesOpcion(int valor) {
       switch (valor) {
          case 1:
             JOptionPane.showMessageDialog(null, "Registrar cliente");
@@ -198,7 +213,7 @@ public class Opcion {
       }
    }
 
-   public void VistaGestionPrestamosOpcion(int valor){
+   public void VistaGestionPrestamosOpcion(int valor) {
       switch (valor) {
          case 1:
             JOptionPane.showMessageDialog(null, "Crear préstamo");
@@ -212,7 +227,7 @@ public class Opcion {
       }
    }
 
-   public void VistaGestionPagosOpcion(int valor){
+   public void VistaGestionPagosOpcion(int valor) {
       switch (valor) {
          case 1:
             JOptionPane.showMessageDialog(null, "Registrar pago");
@@ -226,7 +241,7 @@ public class Opcion {
       }
    }
 
-   public void VistaGestionReportesOpcion(int valor){
+   public void VistaGestionReportesOpcion(int valor) {
       switch (valor) {
          case 1:
             JOptionPane.showMessageDialog(null, "Préstamos activos");
@@ -245,6 +260,5 @@ public class Opcion {
             break;
       }
    }
-
 
 }

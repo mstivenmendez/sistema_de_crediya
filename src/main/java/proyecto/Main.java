@@ -33,12 +33,9 @@ public class Main {
       //    System.err.println("Error al conectar a la base de datos: " + e.getMessage());
       //    return; // Salir si no se puede conectar a la base de datos
       // }
-      // Inicio comenzar = new Inicio();
-      // comenzar.Iniciar();
+      Inicio comenzar = new Inicio();
 
-      ClienteCrud clienteCrud = new ClienteCrud();
-      Cliente cliente = new Cliente();
-      clienteCrud.Guardar(cliente, "INSERT INTO informacion (primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, documento, telefono, fecha_nacimiento) VALUES (?, ?, ?, ?, ?, ?,?)" );
-   
+      comenzar.Iniciar();
+
    }
 }
