@@ -7,7 +7,6 @@ public class Empleado extends Persona{
    private String idEmpleado;
    private String cargo;
    private double sueldo;
-   private LocalDate fechaContratacion;
 
 
    public Empleado(String nombre, String nombre2, String apellido, String apellido2, String correo, String telefono,
@@ -17,7 +16,6 @@ public class Empleado extends Persona{
       this.idEmpleado = idEmpleado;
       this.cargo = cargo;
       this.sueldo = sueldo;
-      this.fechaContratacion = fechaContratacion;
    }
 
    public Empleado() {
@@ -40,12 +38,6 @@ public class Empleado extends Persona{
    }
    public void setSueldo(double sueldo) {
       this.sueldo = sueldo;
-   }
-   public LocalDate getFechaContratacion() {
-      return fechaContratacion;
-   }
-   public void setFechaContratacion(LocalDate fechaContratacion) {
-      this.fechaContratacion = fechaContratacion;
    }
 
 

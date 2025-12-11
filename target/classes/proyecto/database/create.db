@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS crediya_db.usuario (
   usuario_id INT NOT NULL AUTO_INCREMENT,
   correo VARCHAR(80) NOT NULL,
   clave VARCHAR(45) NULL DEFAULT NULL,
-  estado ENUM('activo', 'inactivo') NULL DEFAULT NULL,
-  fecha_creacion DATETIME NULL DEFAULT NULL,
+  estado ENUM('activo', 'inactivo') NULL DEFAULT 'activo',
+  fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (usuario_id))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4

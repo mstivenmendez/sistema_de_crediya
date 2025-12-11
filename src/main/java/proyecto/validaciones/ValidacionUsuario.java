@@ -1,13 +1,12 @@
 package proyecto.validaciones;
 
+import proyecto.util.IngresoDatos;
+
 public class ValidacionUsuario {
 
+   IngresoDatos conexion = new IngresoDatos();
+
    public boolean ValidacionUsuarioExistente(){
-      try {
-
-      } catch (Exception e) {
-
-      }
       return true;
    }
 
