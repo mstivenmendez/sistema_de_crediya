@@ -112,4 +112,11 @@ public class Datos {
          "Ingrese los intereses del prestamo ");
       return valorIntere;
    }
+
+   public String valorCuotas() {
+      String valorIntere = JOptionPane.showInputDialog(null,
+         " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
+         "Ingrese el  numero de Cuotas ");
+      return valorIntere;
+   }
 }

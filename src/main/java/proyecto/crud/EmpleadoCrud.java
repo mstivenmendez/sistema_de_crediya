@@ -20,8 +20,7 @@ public class EmpleadoCrud implements CrudEntity<Empleado> {
    }
 
    @Override
-   public List<Empleado> Buscar() {
-      return null;
+   public void Buscar(String dato) {
    }
 
    @Override

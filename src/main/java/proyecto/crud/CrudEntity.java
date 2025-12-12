@@ -12,6 +12,6 @@ public interface CrudEntity<T> {
 
    public int BuscarPor(Object[] args);
 
-   public List<T> Buscar();
+   public void Buscar(String dato);
 
 }

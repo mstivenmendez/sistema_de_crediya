@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `crediya_db`.`prestamo` (
   `cliente_usuario_id_fk` INT NOT NULL,
   `empleado_usuario_id_fk` INT NOT NULL,
   `valor` DECIMAL(12,2) NOT NULL,
-  `interes` DECIMAL(10,2) NOT NULL,
+  `interes` DECIMAL(10,2) NOT NULL,|
   `cuotas` INT NOT NULL,
   `fecha_inicio` DATETIME NOT NULL,
   `fecha_limite` DATETIME NOT NULL,

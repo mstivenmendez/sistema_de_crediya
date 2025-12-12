@@ -8,8 +8,8 @@ public class Prestamo {
    private int prestamoId;
    private int clienteUsuarioId;
    private int empleadoUsuarioId;
-   private BigDecimal valor;
-   private BigDecimal interes;
+   private Double valor;
+   private Double interes;
    private int cuotas;
    private LocalDateTime fechaInicio;
    private LocalDateTime fechaLimite;
@@ -18,8 +18,8 @@ public class Prestamo {
    public Prestamo() {
    }
 
-   public Prestamo(int prestamoId, int clienteUsuarioId, int empleadoUsuarioId, BigDecimal valor,
-         BigDecimal interes, int cuotas, LocalDateTime fechaInicio,
+   public Prestamo(int prestamoId, int clienteUsuarioId, int empleadoUsuarioId, Double valor,
+         Double interes, int cuotas, LocalDateTime fechaInicio,
          LocalDateTime fechaLimite, Estado estado) {
       this.prestamoId = prestamoId;
       this.clienteUsuarioId = clienteUsuarioId;
@@ -57,19 +57,19 @@ public class Prestamo {
       this.empleadoUsuarioId = empleadoUsuarioId;
    }
 
-   public BigDecimal getValor() {
+   public Double getValor() {
       return valor;
    }
 
-   public void setValor(BigDecimal valor) {
+   public void setValor(Double valor) {
       this.valor = valor;
    }
 
-   public BigDecimal getInteres() {
+   public Double getInteres() {
       return interes;
    }
 
-   public void setInteres(BigDecimal interes) {
+   public void setInteres(Double interes) {
       this.interes = interes;
    }
 

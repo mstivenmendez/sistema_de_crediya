@@ -1,10 +1,14 @@
 package proyecto.crud;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import proyecto.personal.Cliente;
+import proyecto.personal.Empleado;
 import proyecto.solicitud.Datos;
 import proyecto.util.IngresoDatos;
 import proyecto.validaciones.Validacion;
@@ -16,82 +20,151 @@ public class ClienteCrud implements CrudEntity<Cliente> {
    Validacion validar = new Validacion();
 
    @Override
-public int Guardar(Cliente entity, String sql) {
+   public int Guardar(Cliente entity, String sql) {
 
-   int resultado = conexion.ejecutar(sql, ps -> {
-      try {
+      int resultado = conexion.ejecutar(sql, ps -> {
          try {
-            int n = conexion.ejecutar("INSERT INTO usuario (correo, clave,nombre_usuario) VALUES (?, ?, ?)", ps1 -> {
-               try {
+            try {
+               int n = conexion.ejecutar("INSERT INTO usuario (correo, clave,nombre_usuario) VALUES (?, ?, ?)", ps1 -> {
+                  try {
 
-                  entity.setCorreo(validar.ValidarEmail(insertar.Correo()));
-                  entity.setContraseña(validar.ValidarClave(insertar.Password()));
-                  entity.setUsuario(validar.ValidarUsuarioU(insertar.Usuario()));
-                  if (entity.getCorreo() == null || entity.getContraseña() == null || entity.getUsuario() == null) {
-                     throw new RuntimeException("Error de validación: uno de los datos ESTÁ MAL.");
+                     entity.setCorreo(validar.ValidarEmail(insertar.Correo()));
+                     entity.setContraseña(validar.ValidarClave(insertar.Password()));
+                     entity.setUsuario(validar.ValidarUsuarioU(insertar.Usuario()));
+                     if (entity.getCorreo() == null || entity.getContraseña() == null || entity.getUsuario() == null) {
+                        throw new RuntimeException("Error de validación: uno de los datos ESTÁ MAL.");
+                     }
+                     ps1.setString(2, entity.getContraseña());
+                     ps1.setString(1, entity.getCorreo());
+                     ps1.setString(3, entity.getUsuario());
+                     return;
+                  } catch (SQLException e) {
+                     throw new RuntimeException(e);
                   }
-                  ps1.setString(2, entity.getContraseña());
-                  ps1.setString(1, entity.getCorreo());
-                  ps1.setString(3, entity.getUsuario());
-                  return;
-               } catch (SQLException e) {
-                  throw new RuntimeException(e);
-               }
-            });
+               });
 
-         } catch (Exception e) {
+            } catch (Exception e) {
+               throw new RuntimeException(e);
+            }
+
+            // Solicitar y validar todos los datos
+            entity.setNombre(validar.ValidarTexto(insertar.Nombre()));
+            entity.setNombre2(validar.ValidarOpcional(insertar.Nombre2()));
+            entity.setApellido(validar.ValidarTexto(insertar.Apellido()));
+            entity.setApellido2(validar.ValidarOpcional(insertar.Apellido2()));
+            entity.setDocumento(validar.ValidarDocumento(insertar.Cedula()));
+            entity.setTelefono(validar.ValidarTelefonoU(insertar.Telefono())); // Corregido: usar ValidarTelefonoU
+
+            // Validar y convertir la fecha de nacimiento UNA SOLA VEZ
+            String fechaNacimientoStr = insertar.FechaNacimiento();
+            LocalDate fechaNacimiento = validar.ValidarFechaNacimiento(fechaNacimientoStr);
+
+            if (fechaNacimiento == null) {
+               JOptionPane.showMessageDialog(null, "Fecha de nacimiento no válida. No se guardará el cliente.");
+               return; // Si la fecha es inválida, no continuar con el guardado
+            }
+
+            entity.setFechaNacimiento(fechaNacimiento);
+
+            // Configurar los parámetros del PreparedStatement
+            ps.setString(1, entity.getNombre());
+            ps.setString(2, entity.getNombre2());
+            ps.setString(3, entity.getApellido());
+            ps.setString(4, entity.getApellido2());
+            ps.setString(5, entity.getDocumento());
+            ps.setString(6, entity.getTelefono());
+            ps.setObject(7, entity.getFechaNacimiento()); // LocalDate se maneja con setObject
+
+         } catch (SQLException e) {
             throw new RuntimeException(e);
          }
+      });
 
-         // Solicitar y validar todos los datos
-         entity.setNombre(validar.ValidarTexto(insertar.Nombre()));
-         entity.setNombre2(validar.ValidarOpcional(insertar.Nombre2()));
-         entity.setApellido(validar.ValidarTexto(insertar.Apellido()));
-         entity.setApellido2(validar.ValidarOpcional(insertar.Apellido2()));
-         entity.setDocumento(validar.ValidarDocumento(insertar.Cedula()));
-         entity.setTelefono(validar.ValidarTelefonoU(insertar.Telefono())); // Corregido: usar ValidarTelefonoU
-
-         // Validar y convertir la fecha de nacimiento UNA SOLA VEZ
-         String fechaNacimientoStr = insertar.FechaNacimiento();
-         LocalDate fechaNacimiento = validar.ValidarFechaNacimiento(fechaNacimientoStr);
-
-         if (fechaNacimiento == null) {
-            JOptionPane.showMessageDialog(null, "Fecha de nacimiento no válida. No se guardará el cliente.");
-            return; // Si la fecha es inválida, no continuar con el guardado
-         }
-
-         entity.setFechaNacimiento(fechaNacimiento);
-
-         // Configurar los parámetros del PreparedStatement
-         ps.setString(1, entity.getNombre());
-         ps.setString(2, entity.getNombre2());
-         ps.setString(3, entity.getApellido());
-         ps.setString(4, entity.getApellido2());
-         ps.setString(5, entity.getDocumento());
-         ps.setString(6, entity.getTelefono());
-         ps.setObject(7, entity.getFechaNacimiento()); // LocalDate se maneja con setObject
-
-      } catch (SQLException e) {
-         throw new RuntimeException(e);
+      if (resultado > 0) {
+         JOptionPane.showMessageDialog(null, "Guardó Usuario Correctamente");
       }
-   });
-
-   if (resultado > 0) {
-      JOptionPane.showMessageDialog(null, "Guardó Usuario Correctamente");
+      return resultado;
    }
-   return resultado;
-}
 
    @Override
    public int BuscarPor(Object[] args) {
-      // TODO Auto-generated method stub
-      throw new UnsupportedOperationException("Unimplemented method 'buscarPor'");
+      return 1;
    }
 
    @Override
-   public List<Cliente> Buscar() {
-      return null;
+   public void Buscar(String filtro) {
+      String sql = """
+            SELECT DISTINCT *
+            FROM vista_clientes
+            WHERE cliente_id = ?
+               OR cedula = ?
+               OR rol = ?
+            """;
+
+      try {
+
+         seleccionar(sql, rs -> {
+            StringBuilder sb = new StringBuilder();
+            boolean hayResultados = false;
+
+            // Procesar todos los resultados
+            while (rs.next()) {
+               hayResultados = true;
+               sb.append("Usuario # ").append(hayResultados).append("\n");
+               sb.append("Cédula: ").append(rs.getString("documento")).append("\n");
+               sb.append("Usuario: ").append(rs.getString("nombre_usuario")).append("\n");
+               sb.append("Nombre: ").append(rs.getString("primer_nombre")).append(" ").append(rs.getString("segundo_nombre")).append("\n");
+               sb.append("apellido: ").append(rs.getString("primer_apellido")).append(" ").append(rs.getString("segundo_apellido")).append("\n");
+               sb.append("Teléfono: ").append(rs.getString("telefono")).append("\n");
+               sb.append("Correo: ").append(rs.getString("correo")).append("\n");
+               sb.append("Estado: ").append(rs.getString("estado")).append("\n");
+               sb.append("---------------------------\n");
+            }
+
+            if (!hayResultados) {
+               JOptionPane.showMessageDialog(null,
+                     "No se encontraron resultados.");
+            } else {
+               JOptionPane.showMessageDialog(null, sb.toString());
+            }
+         },
+               ps -> {
+                  Integer id = null;
+                  try {
+                     id = Integer.parseInt(filtro);
+                  } catch (NumberFormatException e) {
+                     // Si no es número, id quedará null
+                  }
+                  ps.setInt(1, id != null ? id : -1);
+                  ps.setString(2, filtro);
+                  ps.setString(3, filtro);
+               });
+
+      } catch (SQLException e) {
+         JOptionPane.showMessageDialog(null,
+               "Error al buscar clientes: " + e.getMessage());
+         e.printStackTrace();
+      }
    }
+   // Método auxiliar que debe estar implementado en la clase
+   private void seleccionar(String sql,
+         ResultSetConsumer rsConsumer,
+         PreparedStatementConsumer psConsumer) throws SQLException {
+      // Implementación del método que ejecuta la consulta
+      // y llama a los consumers apropiados
+   }
+
+   // Interfaces funcionales para los lambdas
+   @FunctionalInterface
+   interface ResultSetConsumer {
+      void accept(ResultSet rs) throws SQLException;
+   }
+
+   @FunctionalInterface
+   interface PreparedStatementConsumer {
+      void accept(PreparedStatement ps) throws SQLException;
+   }
+
 
    @Override
    public int Elimnar(Cliente entity, String sql, String id) {
