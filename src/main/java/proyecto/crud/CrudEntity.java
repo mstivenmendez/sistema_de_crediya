@@ -10,8 +10,6 @@ public interface CrudEntity<T> {
 
    public int Actualizar(T entity, String id, String dato);
 
-   public int BuscarPor(Object[] args);
-
    public void Buscar(String dato);
 
 }

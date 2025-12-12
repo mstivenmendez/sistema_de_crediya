@@ -85,12 +85,6 @@ public class ClienteCrud implements CrudEntity<Cliente> {
       }
       return resultado;
    }
-
-   @Override
-   public int BuscarPor(Object[] args) {
-      return 1;
-   }
-
    @Override
    public void Buscar(String filtro) {
       String sql = """
@@ -106,11 +100,13 @@ public class ClienteCrud implements CrudEntity<Cliente> {
          seleccionar(sql, rs -> {
             StringBuilder sb = new StringBuilder();
             boolean hayResultados = false;
+            int contador = 0;
 
             // Procesar todos los resultados
             while (rs.next()) {
                hayResultados = true;
-               sb.append("Usuario # ").append(hayResultados).append("\n");
+               contador++;
+               sb.append("Usuario # ").append(contador).append("\n");
                sb.append("Cédula: ").append(rs.getString("documento")).append("\n");
                sb.append("Usuario: ").append(rs.getString("nombre_usuario")).append("\n");
                sb.append("Nombre: ").append(rs.getString("primer_nombre")).append(" ").append(rs.getString("segundo_nombre")).append("\n");
@@ -145,24 +141,6 @@ public class ClienteCrud implements CrudEntity<Cliente> {
                "Error al buscar clientes: " + e.getMessage());
          e.printStackTrace();
       }
-   }
-   // Método auxiliar que debe estar implementado en la clase
-   private void seleccionar(String sql,
-         ResultSetConsumer rsConsumer,
-         PreparedStatementConsumer psConsumer) throws SQLException {
-      // Implementación del método que ejecuta la consulta
-      // y llama a los consumers apropiados
-   }
-
-   // Interfaces funcionales para los lambdas
-   @FunctionalInterface
-   interface ResultSetConsumer {
-      void accept(ResultSet rs) throws SQLException;
-   }
-
-   @FunctionalInterface
-   interface PreparedStatementConsumer {
-      void accept(PreparedStatement ps) throws SQLException;
    }
 
 
@@ -228,7 +206,10 @@ public class ClienteCrud implements CrudEntity<Cliente> {
                entity.setContraseña(validar.ValidarClave(insertar.Password()));
                ps.setString(index++, entity.getContraseña());
             }
-
+            if (dato.contains("nombre_usuario = ?")) {
+               entity.setUsuario(validar.ValidarUsuarioU(insertar.Usuario()));
+               ps.setString(index++, entity.getUsuario());
+            }
             try {
                ps.setString(index, dato);
             } catch (SQLException e) {
@@ -240,6 +221,25 @@ public class ClienteCrud implements CrudEntity<Cliente> {
          }
 
       });
+   }
+
+   // Método auxiliar que debe estar implementado en la clase
+   private void seleccionar(String sql,
+         ResultSetConsumer rsConsumer,
+         PreparedStatementConsumer psConsumer) throws SQLException {
+      // Implementación del método que ejecuta la consulta
+      // y llama a los consumers apropiados
+   }
+
+   // Interfaces funcionales para los lambdas
+   @FunctionalInterface
+   interface ResultSetConsumer {
+      void accept(ResultSet rs) throws SQLException;
+   }
+
+   @FunctionalInterface
+   interface PreparedStatementConsumer {
+      void accept(PreparedStatement ps) throws SQLException;
    }
 
 }

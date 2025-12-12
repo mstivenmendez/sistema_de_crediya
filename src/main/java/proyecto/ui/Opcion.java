@@ -3,7 +3,10 @@ package proyecto.ui;
 import javax.swing.JOptionPane;
 
 import proyecto.crud.ClienteCrud;
+import proyecto.crud.EmpleadoCrud;
 import proyecto.personal.Cliente;
+import proyecto.personal.Empleado;
+import proyecto.prestamo.CrudPrestamo;
 import proyecto.validaciones.*;
 import proyecto.solicitud.Datos;
 
@@ -12,6 +15,12 @@ public class Opcion {
    ValidarNumero numero = new ValidarNumero();
    Datos datos = new Datos();
    ValidacionUsuario validacionUsuario = new ValidacionUsuario();
+   Validacion  validar = new Validacion();
+   ClienteCrud clienteCrud = new ClienteCrud();
+   Cliente cliente = new Cliente();
+   CrudPrestamo crudPrestamo = new CrudPrestamo();
+   EmpleadoCrud empleadoCrud = new EmpleadoCrud();
+   Empleado empleado = new Empleado();
 
    public void VistaSesionOpcion(int valor) {
       switch (valor) {
@@ -21,8 +30,6 @@ public class Opcion {
             VistaInicioOpcion(resultado);
             break;
          case 2:
-            ClienteCrud clienteCrud = new ClienteCrud();
-            Cliente cliente = new Cliente();
             clienteCrud.Guardar(cliente,
                   "INSERT INTO informacion (primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, documento, telefono, fecha_nacimiento) VALUES (?, ?, ?, ?, ?, ?,?)");
             break;
@@ -38,7 +45,7 @@ public class Opcion {
 
       switch (valor) {
          case 1:
-            
+
             boolean esValido = validacionUsuario.ValidacionUsuarioExistente();
 
             if (esValido) {
@@ -197,28 +204,73 @@ public class Opcion {
             JOptionPane.showMessageDialog(null, "Registrar empleado");
             break;
          case 2:
-            JOptionPane.showMessageDialog(null, "Consultar empleados");
+            String cedula2 = validar.ValidarDocumento(datos.Cedula());
+            if(validacionUsuario.ValidarCedula(cedula2)){
+               empleadoCrud.Buscar(cedula2);
+               JOptionPane.showMessageDialog(null, "Empleados Alistados");
+            }
             break;
          case 3:
-            JOptionPane.showMessageDialog(null, "Actualizar empleado");
+            String cedula3 = validar.ValidarDocumento(datos.Cedula());
+            if(validacionUsuario.ValidarCedula(cedula3)){
+               VistaEmpleadoActualizarOpcion(numero.solicitarEntero(ingreso.VistaEmpleadoActualizar(),4));
+            }
             break;
          case 4:
-            JOptionPane.showMessageDialog(null, "Eliminar empleado");
+            String cedula4 = validar.ValidarDocumento(datos.Cedula());
+            if(validacionUsuario.ValidarCedula(cedula4)){
+               empleadoCrud.Elimnar(empleado, "documento", cedula4);
+            }
             break;
+      }
+   }
+
+   public void VistaEmpleadoActualizarOpcion(int valor){
+      switch (valor) {
+         case 1:
+            String cedula1 = validar.ValidarDocumento(datos.Cedula());
+            if(validacionUsuario.ValidarCedula(cedula1)){
+               empleadoCrud.Actualizar(empleado, cedula1, "telefono = ?");
+               JOptionPane.showMessageDialog(null, "Empleados Alistados");
+            }
+            break;
+         case 2:
+            String cedula2 = validar.ValidarDocumento(datos.Cedula());
+            if(validacionUsuario.ValidarCedula(cedula2)){
+               clienteCrud.ActualizarUsuario(cliente, cedula2, "correo = ?");
+               JOptionPane.showMessageDialog(null, "Empleados Alistados");
+            }
+         case 3:
+            String cedula3 = validar.ValidarDocumento(datos.Cedula());
+            if(validacionUsuario.ValidarCedula(cedula3)){
+               empleadoCrud.Actualizar(empleado, cedula3, "salario = ?");
+               JOptionPane.showMessageDialog(null, "Empleados Alistados");
+            }
+         case 4:
+            String cedula4 = validar.ValidarDocumento(datos.Cedula());
+            if(validacionUsuario.ValidarCedula(cedula4)){
+               clienteCrud.ActualizarUsuario(cliente, cedula4, "nombre_usuario = ?");
+               JOptionPane.showMessageDialog(null, "Empleados Alistados");
+            }
       }
    }
 
    public void VistaGestionClientesOpcion(int valor) {
       switch (valor) {
          case 1:
-            JOptionPane.showMessageDialog(null, "Registrar cliente");
             break;
          case 2:
-            JOptionPane.showMessageDialog(null, "Listar clientes");
-            break;
+            String cedula = validar.ValidarDocumento(datos.Cedula());
+            if(validacionUsuario.ValidarCedula(cedula)){
+               clienteCrud.Buscar(cedula);
+               JOptionPane.showMessageDialog(null, "Cliente Alistados");
+            }
          case 3:
-            JOptionPane.showMessageDialog(null, "Consultar préstamos del cliente");
-            break;
+            String cedula2 = validar.ValidarDocumento(datos.Cedula());
+            if(validacionUsuario.ValidarCedula(cedula2)){
+               clienteCrud.Buscar(cedula2);
+               JOptionPane.showMessageDialog(null, "Prestamos  alistados");
+            }
       }
    }
 

@@ -72,6 +72,19 @@ public class Menu {
       return ingreso;
    }
 
+   public String VistaEmpleadoActualizar() {
+
+      String ingreso = JOptionPane.showInputDialog(null,
+            " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n"
+                  + " 🏦💰 Gestión Actualizacion Empleado 💰🏦 \n"
+                  + "1. Telefono ➕🧑‍💼\n"
+                  + "2. Correo 📋\n"
+                  + "3. Salario ✏️\n"
+                  + "4. NombreUsuario \n"
+                  + "0. Volver 🔙\n");
+      return ingreso;
+   }
+
    public String VistaGestionClientes() {
 
       String ingreso = JOptionPane.showInputDialog(null,
