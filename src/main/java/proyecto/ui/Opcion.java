@@ -12,6 +12,9 @@ public class Opcion {
    ValidarNumero numero = new ValidarNumero();
    Datos datos = new Datos();
    ValidacionUsuario validacionUsuario = new ValidacionUsuario();
+   Validacion validacion = new Validacion();
+   ClienteCrud clienteCrud = new ClienteCrud();
+   Cliente cliente = new Cliente();
 
    public void VistaSesionOpcion(int valor) {
       switch (valor) {
@@ -24,7 +27,7 @@ public class Opcion {
             ClienteCrud clienteCrud = new ClienteCrud();
             Cliente cliente = new Cliente();
             clienteCrud.Guardar(cliente,
-                  "INSERT INTO informacion (primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, documento, telefono, fecha_nacimiento) VALUES (?, ?, ?, ?, ?, ?,?)");
+                  "INSERT INTO informacion (primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, documento, telefono, fecha_nacimiento, usuario_id_fk) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             break;
          case 0:
             JOptionPane.showMessageDialog(null, "Saliendo del Programa...");
@@ -42,10 +45,8 @@ public class Opcion {
             boolean esValido = validacionUsuario.ValidacionUsuarioExistente();
 
             if (esValido) {
-               JOptionPane.showMessageDialog(null, "Inicio de sesión exitoso.");
+               
                VistaUsuarioOpcion(numero.solicitarEntero(ingreso.VistaUsuario(), 7));
-            } else {
-               JOptionPane.showMessageDialog(null, "Credenciales incorrectas. Intente nuevamente.");
             }
             break;
          case 2:
@@ -82,7 +83,9 @@ public class Opcion {
          } else {
             switch (valor) {
                case 1:
-                  JOptionPane.showMessageDialog(null, "Ver mis datos personales");
+                  String cc = datos.Cedula();
+                  validacion.ValidarDocumento(cc);
+                  clienteCrud.Buscar(cc);
                   break;
                case 2:
                   JOptionPane.showMessageDialog(null, "Consultar mis préstamos");

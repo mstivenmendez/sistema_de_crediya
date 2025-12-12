@@ -21,69 +21,98 @@ public class ClienteCrud implements CrudEntity<Cliente> {
 
    @Override
    public int Guardar(Cliente entity, String sql) {
+      
+      try {
+         // PASO 1: Validar y obtener datos del usuario
+         entity.setCorreo(validar.ValidarEmail(insertar.Correo()));
+         entity.setContraseña(validar.ValidarClave(insertar.Password()));
+         entity.setUsuario(validar.ValidarUsuarioU(insertar.Usuario()));
 
-      int resultado = conexion.ejecutar(sql, ps -> {
-         try {
-            try {
-               int n = conexion.ejecutar("INSERT INTO usuario (correo, clave,nombre_usuario) VALUES (?, ?, ?)", ps1 -> {
-                  try {
-
-                     entity.setCorreo(validar.ValidarEmail(insertar.Correo()));
-                     entity.setContraseña(validar.ValidarClave(insertar.Password()));
-                     entity.setUsuario(validar.ValidarUsuarioU(insertar.Usuario()));
-                     if (entity.getCorreo() == null || entity.getContraseña() == null || entity.getUsuario() == null) {
-                        throw new RuntimeException("Error de validación: uno de los datos ESTÁ MAL.");
-                     }
-                     ps1.setString(2, entity.getContraseña());
-                     ps1.setString(1, entity.getCorreo());
-                     ps1.setString(3, entity.getUsuario());
-                     return;
-                  } catch (SQLException e) {
-                     throw new RuntimeException(e);
-                  }
-               });
-
-            } catch (Exception e) {
-               throw new RuntimeException(e);
-            }
-
-            // Solicitar y validar todos los datos
-            entity.setNombre(validar.ValidarTexto(insertar.Nombre()));
-            entity.setNombre2(validar.ValidarOpcional(insertar.Nombre2()));
-            entity.setApellido(validar.ValidarTexto(insertar.Apellido()));
-            entity.setApellido2(validar.ValidarOpcional(insertar.Apellido2()));
-            entity.setDocumento(validar.ValidarDocumento(insertar.Cedula()));
-            entity.setTelefono(validar.ValidarTelefonoU(insertar.Telefono())); // Corregido: usar ValidarTelefonoU
-
-            // Validar y convertir la fecha de nacimiento UNA SOLA VEZ
-            String fechaNacimientoStr = insertar.FechaNacimiento();
-            LocalDate fechaNacimiento = validar.ValidarFechaNacimiento(fechaNacimientoStr);
-
-            if (fechaNacimiento == null) {
-               JOptionPane.showMessageDialog(null, "Fecha de nacimiento no válida. No se guardará el cliente.");
-               return; // Si la fecha es inválida, no continuar con el guardado
-            }
-
-            entity.setFechaNacimiento(fechaNacimiento);
-
-            // Configurar los parámetros del PreparedStatement
-            ps.setString(1, entity.getNombre());
-            ps.setString(2, entity.getNombre2());
-            ps.setString(3, entity.getApellido());
-            ps.setString(4, entity.getApellido2());
-            ps.setString(5, entity.getDocumento());
-            ps.setString(6, entity.getTelefono());
-            ps.setObject(7, entity.getFechaNacimiento()); // LocalDate se maneja con setObject
-
-         } catch (SQLException e) {
-            throw new RuntimeException(e);
+         if (entity.getCorreo() == null || entity.getContraseña() == null || entity.getUsuario() == null) {
+            JOptionPane.showMessageDialog(null, "Error de validación: datos de usuario inválidos.");
+            return 0;
          }
-      });
 
-      if (resultado > 0) {
-         JOptionPane.showMessageDialog(null, "Guardó Usuario Correctamente");
+         // PASO 2: Insertar en tabla usuario y obtener el ID generado
+         final int[] usuarioId = {0};
+         
+         usuarioId[0] = conexion.ejecutarYObtenerID(
+            "INSERT INTO usuario (correo, clave, nombre_usuario) VALUES (?, ?, ?)", 
+            ps -> {
+               try {
+                  ps.setString(1, entity.getCorreo());
+                  ps.setString(2, entity.getContraseña());
+                  ps.setString(3, entity.getUsuario());
+               } catch (SQLException e) {
+                  throw new RuntimeException("Error al configurar usuario: " + e.getMessage(), e);
+               }
+            }
+         );
+
+         // Verificar que se insertó correctamente
+         if (usuarioId[0] == 0) {
+            JOptionPane.showMessageDialog(null, 
+               "Error: No se pudo crear el usuario en el sistema.",
+               "Error", 
+               JOptionPane.ERROR_MESSAGE);
+            return 0;
+         }
+
+         // PASO 3: Solicitar y validar datos personales
+         entity.setNombre(validar.ValidarTexto(insertar.Nombre()));
+         entity.setNombre2(validar.ValidarOpcional(insertar.Nombre2()));
+         entity.setApellido(validar.ValidarTexto(insertar.Apellido()));
+         entity.setApellido2(validar.ValidarOpcional(insertar.Apellido2()));
+         entity.setDocumento(validar.ValidarDocumento(insertar.Cedula()));
+         entity.setTelefono(validar.ValidarTelefonoU(insertar.Telefono()));
+
+         // Validar y convertir la fecha de nacimiento
+         String fechaNacimientoStr = insertar.FechaNacimiento();
+         LocalDate fechaNacimiento = validar.ValidarFechaNacimiento(fechaNacimientoStr);
+
+         if (fechaNacimiento == null) {
+            JOptionPane.showMessageDialog(null, 
+               "Fecha de nacimiento no válida. No se guardará el cliente.");
+            return 0;
+         }
+
+         entity.setFechaNacimiento(fechaNacimiento);
+
+         // PASO 4: Insertar en tabla informacion con el usuario_id_fk
+         int resultado = conexion.ejecutar(sql, ps -> {
+            try {
+               ps.setString(1, entity.getNombre());
+               ps.setString(2, entity.getNombre2());
+               ps.setString(3, entity.getApellido());
+               ps.setString(4, entity.getApellido2());
+               ps.setString(5, entity.getDocumento());
+               ps.setString(6, entity.getTelefono());
+               ps.setObject(7, entity.getFechaNacimiento());
+               ps.setInt(8, usuarioId[0]); // ← AQUÍ SE USA EL ID DEL USUARIO
+            } catch (SQLException e) {
+               throw new RuntimeException("Error al guardar información personal: " + e.getMessage(), e);
+            }
+         });
+
+         if (resultado > 0) {
+            JOptionPane.showMessageDialog(null, 
+               "✅ Usuario registrado correctamente\n" +
+               "ID de Usuario: " + usuarioId[0] + "\n" +
+               "Usuario: " + entity.getUsuario(),
+               "Registro Exitoso",
+               JOptionPane.INFORMATION_MESSAGE);
+         }
+
+         return resultado;
+
+      } catch (Exception e) {
+         e.printStackTrace();
+         JOptionPane.showMessageDialog(null, 
+            "Error al guardar el cliente: " + e.getMessage(),
+            "Error", 
+            JOptionPane.ERROR_MESSAGE);
+         return 0;
       }
-      return resultado;
    }
 
    @Override
@@ -96,8 +125,8 @@ public class ClienteCrud implements CrudEntity<Cliente> {
       String sql = """
             SELECT DISTINCT *
             FROM vista_clientes
-            WHERE cliente_id = ?
-               OR cedula = ?
+            WHERE usuario_id = ?
+               OR documento = ?
                OR rol = ?
             """;
 
