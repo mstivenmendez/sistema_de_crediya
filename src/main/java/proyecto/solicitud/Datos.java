@@ -130,4 +130,11 @@ public class Datos {
          "Ingresa tu Usuario: ");
       return valorUserString;
    }
+
+   public String valorCuotas() {
+      String valorIntere = JOptionPane.showInputDialog(null,
+         " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
+         "Ingrese el  numero de Cuotas ");
+      return valorIntere;
+   }
 }
