@@ -54,6 +54,8 @@ public class Datos {
       return password;
    }
 
+
+
    public String Cedula() {
       String cedula = JOptionPane.showInputDialog(null,
          " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
@@ -113,10 +115,19 @@ public class Datos {
       return valorIntere;
    }
 
-   public String valorCuotas() {
-      String valorIntere = JOptionPane.showInputDialog(null,
+   ///inicio de sesion
+
+   public String EnterPassword() {
+      String valorPasswordString = JOptionPane.showInputDialog(null,
          " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
-         "Ingrese el  numero de Cuotas ");
-      return valorIntere;
+         "Ingresa tu contraseña: ");
+      return valorPasswordString;
+   }
+
+   public String EnterUser() {
+      String valorUserString = JOptionPane.showInputDialog(null,
+         " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
+         "Ingresa tu Usuario: ");
+      return valorUserString;
    }
 }

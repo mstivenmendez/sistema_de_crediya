@@ -4,11 +4,14 @@ import javax.swing.JOptionPane;
 
 import proyecto.crud.ClienteCrud;
 import proyecto.personal.Cliente;
-import proyecto.validaciones.ValidarNumero;
+import proyecto.validaciones.*;
+import proyecto.solicitud.Datos;
 
 public class Opcion {
    Menu ingreso = new Menu();
    ValidarNumero numero = new ValidarNumero();
+   Datos datos = new Datos();
+   ValidacionUsuario validacionUsuario = new ValidacionUsuario();
 
    public void VistaSesionOpcion(int valor) {
       switch (valor) {
@@ -16,8 +19,6 @@ public class Opcion {
             var opcion = ingreso.VistaInicio();
             int resultado = numero.solicitarEntero(opcion, 2);
             VistaInicioOpcion(resultado);
-            ///////////////
-            VistaInicioOpcion(numero.solicitarEntero(ingreso.VistaInicio(), 2));
             break;
          case 2:
             ClienteCrud clienteCrud = new ClienteCrud();
@@ -37,7 +38,15 @@ public class Opcion {
 
       switch (valor) {
          case 1:
-            VistaUsuarioOpcion(numero.solicitarEntero(ingreso.VistaUsuario(), 7));
+            
+            boolean esValido = validacionUsuario.ValidacionUsuarioExistente();
+
+            if (esValido) {
+               JOptionPane.showMessageDialog(null, "Inicio de sesión exitoso.");
+               VistaUsuarioOpcion(numero.solicitarEntero(ingreso.VistaUsuario(), 7));
+            } else {
+               JOptionPane.showMessageDialog(null, "Credenciales incorrectas. Intente nuevamente.");
+            }
             break;
          case 2:
             // Bucle para mantener en el menú de administrador
