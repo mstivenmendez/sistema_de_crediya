@@ -6,14 +6,14 @@ import proyecto.prestamo.Estado;
 
 public class Cliente extends Persona {
 
-   private String idCliente;
+   private int idCliente;
    private String usuario;
    private String contraseña;
    private Estado estado;
    private LocalDate fechaRegistro;
 
    public Cliente(String nombre, String nombre2, String apellido, String apellido2, String correo, String telefono,
-         String documento, LocalDate fechaNacimiento, String idCliente, String usuario, String contraseña,
+         String documento, LocalDate fechaNacimiento, int idCliente, String usuario, String contraseña,
          Estado estado, LocalDate fechaRegistro) {
       super(nombre, nombre2, apellido, apellido2, correo, telefono, documento, fechaNacimiento);
       this.idCliente = idCliente;
@@ -26,10 +26,10 @@ public class Cliente extends Persona {
    public Cliente() {
    }
 
-   public String getIdCliente() {
+   public int getIdCliente() {
       return idCliente;
    }
-   public void setIdCliente(String idCliente) {
+   public void setIdCliente(int idCliente) {
       this.idCliente = idCliente;
    }
    public String getUsuario() {

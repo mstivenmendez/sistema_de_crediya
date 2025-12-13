@@ -34,16 +34,21 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
             if (usuario.ValidarCedula(cedula)) {
                int id = usuario.validarCedulaYObtener(cedula);
                entity.setClienteUsuarioId(id);
-               entity.setEmpleadoUsuarioId(2);
-               entity.setValor(numero.solicitarDouble(insertar.valorPrestamo(), 1000000000));
-               entity.setInteres(numero.solicitarDouble(insertar.IdPrestamo(), 100));
-               entity.setCuotas(numero.solicitarEntero(insertar.valorCuotas(), 240));
-
                ps.setInt(1, entity.getClienteUsuarioId());
-               ps.setInt(2, entity.getEmpleadoUsuarioId());
-               ps.setDouble(3, entity.getValor());
-               ps.setDouble(4, entity.getInteres());
-               ps.setInt(5, entity.getCuotas());
+               String cedulaEmpleado = validar.ValidarDocumento(insertar.Cedula());
+               if (usuario.ValidarCedula(cedulaEmpleado)) {
+                  int idEmpleado = usuario.validarCedulaYObtener(cedulaEmpleado);
+                  entity.setEmpleadoUsuarioId(idEmpleado);
+                  entity.setValor(numero.solicitarDouble(insertar.valorPrestamo(), 1000000000));
+                  entity.setInteres(numero.solicitarDouble(insertar.IdPrestamo(), 100));
+                  entity.setCuotas(numero.solicitarEntero(insertar.valorCuotas(), 240));
+
+                  ps.setInt(1, entity.getClienteUsuarioId());
+                  ps.setInt(2, entity.getEmpleadoUsuarioId());
+                  ps.setDouble(3, entity.getValor());
+                  ps.setDouble(4, entity.getInteres());
+                  ps.setInt(5, entity.getCuotas());
+               }
             }
 
          } catch (SQLException e) {
@@ -53,7 +58,7 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
       });
 
       if (resultado > 0) {
-         JOptionPane.showMessageDialog(null, "Guardó Usuario Correctamente");
+         JOptionPane.showMessageDialog(null, "Guardó el  prestamo exitoso ");
       }
       return resultado;
    }
@@ -80,8 +85,8 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
    @Override
    public void Buscar(String filtro) {
       String sql = """
-            SELECT DISTINCT *
-            FROM vista_clientes
+            SELECT prestamos
+            FROM *
             WHERE cliente_id = ?
                OR cedula = ?
                OR rol = ?
@@ -100,8 +105,10 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
                contador++;
                sb.append("Prestamo # ").append(contador).append("\n");
                sb.append("Cédula: ").append(rs.getString("documento")).append("\n");
-               sb.append("Nombre: ").append(rs.getString("primer_nombre")).append(" ").append(rs.getString("segundo_nombre")).append("\n");
-               sb.append("apellido: ").append(rs.getString("primer_apellido")).append(" ").append(rs.getString("segundo_apellido")).append("\n");
+               sb.append("Nombre: ").append(rs.getString("primer_nombre")).append(" ")
+                     .append(rs.getString("segundo_nombre")).append("\n");
+               sb.append("apellido: ").append(rs.getString("primer_apellido")).append(" ")
+                     .append(rs.getString("segundo_apellido")).append("\n");
                sb.append("Valor: ").append(rs.getString("valor")).append("\n");
                sb.append("Cuotas: ").append(rs.getString("cuotas")).append("\n");
                sb.append("Estado: ").append(rs.getString("estado")).append("\n");

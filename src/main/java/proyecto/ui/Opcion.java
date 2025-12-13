@@ -7,6 +7,7 @@ import proyecto.crud.EmpleadoCrud;
 import proyecto.personal.Cliente;
 import proyecto.personal.Empleado;
 import proyecto.prestamo.CrudPrestamo;
+import proyecto.prestamo.Prestamo;
 import proyecto.validaciones.*;
 import proyecto.solicitud.Datos;
 import proyecto.util.Simular;
@@ -16,13 +17,15 @@ public class Opcion {
    ValidarNumero numero = new ValidarNumero();
    Datos datos = new Datos();
    ValidacionUsuario validacionUsuario = new ValidacionUsuario();
-   Validacion  validar = new Validacion();
+   Validacion validar = new Validacion();
    ClienteCrud clienteCrud = new ClienteCrud();
    Cliente cliente = new Cliente();
    CrudPrestamo crudPrestamo = new CrudPrestamo();
    EmpleadoCrud empleadoCrud = new EmpleadoCrud();
    Empleado empleado = new Empleado();
    Simular simulacion = new Simular();
+   String Cedula = "";
+   Prestamo prestamo = new Prestamo();
 
    public void VistaSesionOpcion(int valor) {
       switch (valor) {
@@ -203,86 +206,71 @@ public class Opcion {
    public void VistaAdministradorEmpledaoOpcion(int valor) {
       switch (valor) {
          case 1:
-            JOptionPane.showMessageDialog(null, "Registrar empleado");
+            empleadoCrud.Guardar(empleado,
+                  "INSERT INTO informacion (primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, documento, salario, telefono, fecha_nacimiento, usuario_id_fk) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             break;
          case 2:
-            String cedula2 = validar.ValidarDocumento(datos.Cedula());
-            if(validacionUsuario.ValidarCedula(cedula2)){
-               empleadoCrud.Buscar(cedula2);
-               JOptionPane.showMessageDialog(null, "Empleados Alistados");
-            }
+            empleadoCrud.Buscar("empleado");
+            JOptionPane.showMessageDialog(null, "Empleados Alistados");
             break;
          case 3:
             String cedula3 = validar.ValidarDocumento(datos.Cedula());
-            if(validacionUsuario.ValidarCedula(cedula3)){
-               VistaEmpleadoActualizarOpcion(numero.solicitarEntero(ingreso.VistaEmpleadoActualizar(),4));
+            if (validacionUsuario.ValidarCedula(cedula3)) {
+               VistaEmpleadoActualizarOpcion(numero.solicitarEntero(ingreso.VistaEmpleadoActualizar(), 4));
+               Cedula = cedula3;
             }
             break;
          case 4:
             String cedula4 = validar.ValidarDocumento(datos.Cedula());
-            if(validacionUsuario.ValidarCedula(cedula4)){
+            if (validacionUsuario.ValidarCedula(cedula4)) {
                empleadoCrud.Elimnar(empleado, "documento", cedula4);
             }
             break;
       }
    }
 
-   public void VistaEmpleadoActualizarOpcion(int valor){
+   public void VistaEmpleadoActualizarOpcion(int valor) {
       switch (valor) {
          case 1:
-            String cedula1 = validar.ValidarDocumento(datos.Cedula());
-            if(validacionUsuario.ValidarCedula(cedula1)){
-               empleadoCrud.Actualizar(empleado, cedula1, "telefono = ?");
-               JOptionPane.showMessageDialog(null, "Empleados Alistados");
-            }
+            empleadoCrud.Actualizar(empleado, Cedula, "telefono = ?");
+            JOptionPane.showMessageDialog(null, "telefono Actualizado");
             break;
          case 2:
-            String cedula2 = validar.ValidarDocumento(datos.Cedula());
-            if(validacionUsuario.ValidarCedula(cedula2)){
-               clienteCrud.ActualizarUsuario(cliente, cedula2, "correo = ?");
-               JOptionPane.showMessageDialog(null, "Empleados Alistados");
-            }
+            clienteCrud.ActualizarUsuario(cliente, Cedula, "correo = ?");
+            JOptionPane.showMessageDialog(null, "correo actualizado");
          case 3:
-            String cedula3 = validar.ValidarDocumento(datos.Cedula());
-            if(validacionUsuario.ValidarCedula(cedula3)){
-               empleadoCrud.Actualizar(empleado, cedula3, "salario = ?");
-               JOptionPane.showMessageDialog(null, "Empleados Alistados");
-            }
+            empleadoCrud.Actualizar(empleado, Cedula, "salario = ?");
+            JOptionPane.showMessageDialog(null, "salario Actualizado");
          case 4:
-            String cedula4 = validar.ValidarDocumento(datos.Cedula());
-            if(validacionUsuario.ValidarCedula(cedula4)){
-               clienteCrud.ActualizarUsuario(cliente, cedula4, "nombre_usuario = ?");
-               JOptionPane.showMessageDialog(null, "Empleados Alistados");
-            }
+            clienteCrud.ActualizarUsuario(cliente, Cedula, "nombre_usuario = ?");
+            JOptionPane.showMessageDialog(null, "Usuario actualizado Al");
       }
    }
 
    public void VistaGestionClientesOpcion(int valor) {
       switch (valor) {
          case 1:
+            clienteCrud.Guardar(cliente,
+                  "INSERT INTO informacion (primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, documento, telefono, fecha_nacimiento, usuario_id_fk) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             break;
          case 2:
-            String cedula = validar.ValidarDocumento(datos.Cedula());
-            if(validacionUsuario.ValidarCedula(cedula)){
-               clienteCrud.Buscar(cedula);
-               JOptionPane.showMessageDialog(null, "Cliente Alistados");
-            }
+            clienteCrud.Buscar("cliente");
          case 3:
-            String cedula2 = validar.ValidarDocumento(datos.Cedula());
-            if(validacionUsuario.ValidarCedula(cedula2)){
-               clienteCrud.Buscar(cedula2);
-               JOptionPane.showMessageDialog(null, "Prestamos  alistados");
-            }
+            break;
       }
    }
 
    public void VistaGestionPrestamosOpcion(int valor) {
       switch (valor) {
          case 1:
-            JOptionPane.showMessageDialog(null, "Crear préstamo");
+            crudPrestamo.Guardar(prestamo,
+                  "INSERT INTO prestamo (cliente_usuario_id_fk, empleado_usuario_id_fk, valor, interes, cuotas ) VALUES(?, ?, ?, ?, ?)");
             break;
          case 2:
-            JOptionPane.showMessageDialog(null, "Listar préstamos");
+            String cedula1 = validar.ValidarDocumento(datos.Cedula());
+            if (validacionUsuario.ValidarCedula(cedula1)) {
+               crudPrestamo.Buscar(cedula1);
+            }
             break;
          case 3:
             JOptionPane.showMessageDialog(null, "Cambiar estado del préstamo");

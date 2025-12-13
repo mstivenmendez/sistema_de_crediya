@@ -140,7 +140,14 @@ public class Datos {
    public String valorSalario() {
       String valorIntere = JOptionPane.showInputDialog(null,
          " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
-         "Ingrese el  numero de Cuotas ");
+         "Ingrese el valor del salario  ");
       return valorIntere;
+   }
+
+   public String CedulaEmpleado() {
+      String cedula = JOptionPane.showInputDialog(null,
+         " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
+         "POr favor ingrese su numero de documento del empleado que va hacer el credito\n");
+      return cedula;
    }
 }
