@@ -55,7 +55,6 @@ public class Datos {
    }
 
 
-
    public String Cedula() {
       String cedula = JOptionPane.showInputDialog(null,
          " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
@@ -102,14 +101,14 @@ public class Datos {
    }
 
    public String valorPrestamo() {
-      String valorPrestamo = JOptionPane.showInputDialog(null,
+      String valorPrestamo = JOptionPane.showInputDialog(null,  ///simular prestamo
          " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
          "Ingrese el valor del prestamo");
       return valorPrestamo;
    }
 
    public String valorInteres() {
-      String valorIntere = JOptionPane.showInputDialog(null,
+      String valorIntere = JOptionPane.showInputDialog(null,  ///simular prestamo
          " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
          "Ingrese los intereses del prestamo ");
       return valorIntere;
@@ -132,7 +131,7 @@ public class Datos {
    }
 
    public String valorCuotas() {
-      String valorIntere = JOptionPane.showInputDialog(null,
+      String valorIntere = JOptionPane.showInputDialog(null, ///simular prestamo
          " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
          "Ingrese el  numero de Cuotas ");
       return valorIntere;

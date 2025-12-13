@@ -116,10 +116,6 @@ public class ValidacionUsuario {
                   "✅ Inicio de sesión exitoso\n¡Bienvenido " + usuarioValidado + "!",
                   "Acceso Concedido",
                   JOptionPane.INFORMATION_MESSAGE);
-            JOptionPane.showMessageDialog(null,
-                  "✅ Inicio de sesión exitoso\n¡Bienvenido " + usuarioValidado + "!",
-                  "Acceso Concedido",
-                  JOptionPane.INFORMATION_MESSAGE);
             return true;
          } else {
             JOptionPane.showMessageDialog(null,
