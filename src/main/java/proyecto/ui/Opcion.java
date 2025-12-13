@@ -9,6 +9,7 @@ import proyecto.personal.Empleado;
 import proyecto.prestamo.CrudPrestamo;
 import proyecto.validaciones.*;
 import proyecto.solicitud.Datos;
+import proyecto.util.Simular;
 
 public class Opcion {
    Menu ingreso = new Menu();
@@ -21,6 +22,7 @@ public class Opcion {
    CrudPrestamo crudPrestamo = new CrudPrestamo();
    EmpleadoCrud empleadoCrud = new EmpleadoCrud();
    Empleado empleado = new Empleado();
+   Simular simulacion = new Simular();
 
    public void VistaSesionOpcion(int valor) {
       switch (valor) {
@@ -87,9 +89,9 @@ public class Opcion {
          } else {
             switch (valor) {
                case 1:
-                  String cc = datos.Cedula();
-                  validar.ValidarDocumento(cc);
-                  clienteCrud.Buscar(cc);
+                  // String cc = datos.Cedula();
+                  // validar.ValidarDocumento(cc);
+                  // clienteCrud.Buscar(cc);
                   break;
                case 2:
                   JOptionPane.showMessageDialog(null, "Consultar mis préstamos");
@@ -104,7 +106,7 @@ public class Opcion {
                   JOptionPane.showMessageDialog(null, "Realizar Solicitud De Préstamo");
                   break;
                case 6:
-                  JOptionPane.showMessageDialog(null, "Simulación Préstamo");
+                  simulacion.ejecutarSimulacion();
                   break;
                case 7:
                   JOptionPane.showMessageDialog(null, "Reportes (notificaciones)");
