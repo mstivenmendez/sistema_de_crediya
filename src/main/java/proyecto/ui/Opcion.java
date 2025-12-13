@@ -49,7 +49,7 @@ public class Opcion {
             boolean esValido = validacionUsuario.ValidacionUsuarioExistente();
 
             if (esValido) {
-               
+
                VistaUsuarioOpcion(numero.solicitarEntero(ingreso.VistaUsuario(), 7));
             }
             break;
@@ -88,7 +88,7 @@ public class Opcion {
             switch (valor) {
                case 1:
                   String cc = datos.Cedula();
-                  validacion.ValidarDocumento(cc);
+                  validar.ValidarDocumento(cc);
                   clienteCrud.Buscar(cc);
                   break;
                case 2:
