@@ -1,6 +1,12 @@
 package proyecto.validaciones;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
 import javax.swing.JOptionPane;
+
+import proyecto.conector.ConexionDB;
 import proyecto.solicitud.Datos;
 import proyecto.util.IngresoDatos;
 
@@ -15,18 +21,21 @@ public class ValidacionUsuario {
     *
     * @param nombreUsuario Nombre de usuario
     * @param clave         Contraseña del usuario
+    * @param clave         Contraseña del usuario
     * @return true si el usuario existe y las credenciales son correctas
     */
    public boolean validarCredenciales(String nombreUsuario, String clave) {
       final boolean[] existe = { false };
+      final int[] userId = { 0 };
 
-      String sql = "SELECT nombre_usuario, clave FROM usuario WHERE nombre_usuario = ? AND clave = ?";
+      String sql = "SELECT nombre_usuario, clave, usuario_id FROM usuario WHERE nombre_usuario = ? AND clave = ?";
 
       conexion.seleccionar(sql,
             rs -> {
                try {
                   if (rs.next()) {
                      existe[0] = true;
+                     userId[0] = rs.getInt("usuario_id");
                   }
                } catch (Exception e) {
                   e.printStackTrace();
@@ -44,12 +53,12 @@ public class ValidacionUsuario {
                   e.printStackTrace();
                }
             });
-
       return existe[0];
    }
 
    /**
     * Valida si existe un usuario y solicita las credenciales con validación
+    * 
     *
     * @return true si el usuario existe y las credenciales son válidas
     */
@@ -58,8 +67,13 @@ public class ValidacionUsuario {
          // Solicitar el nombre de usuario
          String nombreUsuario = insertar.EnterUser();
 
+
          // Validar que no sea nulo o vacío
          if (nombreUsuario == null || nombreUsuario.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null,
+                  "Usuario no puede estar vacío",
+                  "Validación",
+                  JOptionPane.WARNING_MESSAGE);
             JOptionPane.showMessageDialog(null,
                   "Usuario no puede estar vacío",
                   "Validación",
@@ -76,8 +90,13 @@ public class ValidacionUsuario {
          // Solicitar la contraseña
          String clave = insertar.EnterPassword();
 
+
          // Validar que no sea nula o vacía
          if (clave == null || clave.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null,
+                  "Contraseña no puede estar vacía",
+                  "Validación",
+                  JOptionPane.WARNING_MESSAGE);
             JOptionPane.showMessageDialog(null,
                   "Contraseña no puede estar vacía",
                   "Validación",
@@ -97,8 +116,16 @@ public class ValidacionUsuario {
                   "✅ Inicio de sesión exitoso\n¡Bienvenido " + usuarioValidado + "!",
                   "Acceso Concedido",
                   JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null,
+                  "✅ Inicio de sesión exitoso\n¡Bienvenido " + usuarioValidado + "!",
+                  "Acceso Concedido",
+                  JOptionPane.INFORMATION_MESSAGE);
             return true;
          } else {
+            JOptionPane.showMessageDialog(null,
+                  "❌ Usuario o contraseña incorrectos\nVerifique sus credenciales",
+                  "Acceso Denegado",
+                  JOptionPane.ERROR_MESSAGE);
             JOptionPane.showMessageDialog(null,
                   "❌ Usuario o contraseña incorrectos\nVerifique sus credenciales",
                   "Acceso Denegado",
@@ -372,35 +399,45 @@ public class ValidacionUsuario {
     * @param clave         Contraseña
     * @return Array con [id, nombre_usuario, correo, rol] o null si no existe
     */
-   public String[] obtenerDatosUsuario(String nombreUsuario, String clave) {
-      final String[][] datos = { null };
+   public void obtenerDatosUsuario(int userId) {
+      // Consultar la base de datos para obtener los datos del usuario basado en
+      // user_id_fk
+      String sql = "SELECT primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, telefono, fecha_nacimiento FROM informacion WHERE usuario_id_fk = ?";
 
-      String sql = "SELECT id, nombre_usuario, correo, rol FROM usuario WHERE nombre_usuario = ? AND clave = ?";
+      try (Connection con = ConexionDB.conectar();
+            PreparedStatement ps = con.prepareStatement(sql)) {
 
-      conexion.seleccionar(sql,
-            rs -> {
-               try {
-                  if (rs.next()) {
-                     datos[0] = new String[4];
-                     datos[0][0] = String.valueOf(rs.getInt("id"));
-                     datos[0][1] = rs.getString("nombre_usuario");
-                     datos[0][2] = rs.getString("correo");
-                     datos[0][3] = rs.getString("rol");
-                  }
-               } catch (Exception e) {
-                  e.printStackTrace();
-               }
-            },
-            ps -> {
-               try {
-                  ps.setString(1, nombreUsuario);
-                  ps.setString(2, clave);
-               } catch (Exception e) {
-                  e.printStackTrace();
-               }
-            });
+         // Establecer el user_id_fk en la consulta
+         ps.setInt(1, userId);
 
-      return datos[0];
+         try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+               // Recuperar los datos del usuario
+               String primerNombre = rs.getString("primer_nombre");
+               String segundoNombre = rs.getString("segundo_nombre");
+               String primerApellido = rs.getString("primer_apellido");
+               String segundoApellido = rs.getString("segundo_apellido");
+               String telefono = rs.getString("telefono");
+               String fechaNacimiento = rs.getString("fecha_nacimiento");
+
+               // Mostrar los datos del usuario
+               JOptionPane.showMessageDialog(null,
+                     "Datos del usuario:\n" +
+                           "Nombre: " + primerNombre + " " + segundoNombre + " " + primerApellido + " "
+                           + segundoApellido + "\n" +
+                           "Teléfono: " + telefono + "\n" +
+                           "Fecha de nacimiento: " + fechaNacimiento);
+            } else {
+               JOptionPane.showMessageDialog(null, "Usuario no encontrado en la tabla 'informacion'.");
+            }
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+         JOptionPane.showMessageDialog(null,
+               "Error al obtener los datos del usuario: " + e.getMessage(),
+               "Error",
+               JOptionPane.ERROR_MESSAGE);
+      }
    }
 
    public Integer validarCedulaYObtener(String documento) {
