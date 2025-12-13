@@ -4,11 +4,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.JOptionPane;
 import proyecto.personal.Cliente;
-import proyecto.personal.Empleado;
 import proyecto.solicitud.Datos;
 import proyecto.util.IngresoDatos;
 import proyecto.validaciones.Validacion;
@@ -21,7 +18,7 @@ public class ClienteCrud implements CrudEntity<Cliente> {
 
    @Override
    public int Guardar(Cliente entity, String sql) {
-      
+
       try {
          // PASO 1: Validar y obtener datos del usuario
          entity.setCorreo(validar.ValidarEmail(insertar.Correo()));
@@ -35,9 +32,9 @@ public class ClienteCrud implements CrudEntity<Cliente> {
 
          // PASO 2: Insertar en tabla usuario y obtener el ID generado
          final int[] usuarioId = {0};
-         
+
          usuarioId[0] = conexion.ejecutarYObtenerID(
-            "INSERT INTO usuario (correo, clave, nombre_usuario) VALUES (?, ?, ?)", 
+            "INSERT INTO usuario (correo, clave, nombre_usuario) VALUES (?, ?, ?)",
             ps -> {
                try {
                   ps.setString(1, entity.getCorreo());
@@ -51,9 +48,9 @@ public class ClienteCrud implements CrudEntity<Cliente> {
 
          // Verificar que se insertó correctamente
          if (usuarioId[0] == 0) {
-            JOptionPane.showMessageDialog(null, 
+            JOptionPane.showMessageDialog(null,
                "Error: No se pudo crear el usuario en el sistema.",
-               "Error", 
+               "Error",
                JOptionPane.ERROR_MESSAGE);
             return 0;
          }
@@ -71,7 +68,7 @@ public class ClienteCrud implements CrudEntity<Cliente> {
          LocalDate fechaNacimiento = validar.ValidarFechaNacimiento(fechaNacimientoStr);
 
          if (fechaNacimiento == null) {
-            JOptionPane.showMessageDialog(null, 
+            JOptionPane.showMessageDialog(null,
                "Fecha de nacimiento no válida. No se guardará el cliente.");
             return 0;
          }
@@ -95,7 +92,7 @@ public class ClienteCrud implements CrudEntity<Cliente> {
          });
 
          if (resultado > 0) {
-            JOptionPane.showMessageDialog(null, 
+            JOptionPane.showMessageDialog(null,
                "✅ Usuario registrado correctamente\n" +
                "ID de Usuario: " + usuarioId[0] + "\n" +
                "Usuario: " + entity.getUsuario(),
@@ -107,9 +104,9 @@ public class ClienteCrud implements CrudEntity<Cliente> {
 
       } catch (Exception e) {
          e.printStackTrace();
-         JOptionPane.showMessageDialog(null, 
+         JOptionPane.showMessageDialog(null,
             "Error al guardar el cliente: " + e.getMessage(),
-            "Error", 
+            "Error",
             JOptionPane.ERROR_MESSAGE);
          return 0;
       }

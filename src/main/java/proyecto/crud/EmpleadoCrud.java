@@ -3,7 +3,7 @@ package proyecto.crud;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
+import java.time.LocalDate;
 import javax.swing.JOptionPane;
 import proyecto.personal.Empleado;
 import proyecto.solicitud.Datos;
@@ -48,6 +48,7 @@ public class EmpleadoCrud implements CrudEntity<Empleado> {
                sb.append("Teléfono: ").append(rs.getString("telefono")).append("\n");
                sb.append("Correo: ").append(rs.getString("correo")).append("\n");
                sb.append("Estado: ").append(rs.getString("estado")).append("\n");
+               sb.append("Salario: ").append(rs.getDouble("salario")).append("\n");
                sb.append("---------------------------\n");
             }
 
@@ -79,8 +80,100 @@ public class EmpleadoCrud implements CrudEntity<Empleado> {
 
    @Override
    public int Guardar(Empleado entity, String dato) {
-      // TODO Auto-generated method stub
-      throw new UnsupportedOperationException("Unimplemented method 'Guardar'");
+
+      try {
+         // PASO 1: Validar y obtener datos del usuario
+         entity.setCorreo(validar.ValidarEmail(insertar.Correo()));
+         entity.setContraseña(validar.ValidarClave(insertar.Password()));
+         entity.setUsuario(validar.ValidarUsuarioU(insertar.Usuario()));
+         entity.setCargo("empleado");
+
+         if (entity.getCorreo() == null || entity.getContraseña() == null || entity.getUsuario() == null) {
+            JOptionPane.showMessageDialog(null, "Error de validación: datos de empleado inválidos.");
+            return 0;
+         }
+
+         // PASO 2: Insertar en tabla usuario y obtener el ID generado
+         final int[] usuarioId = {0};
+
+         usuarioId[0] = conexion.ejecutarYObtenerID(
+            "INSERT INTO usuario (correo, clave, nombre_usuario, rol) VALUES (?, ?, ?, ?)",
+            ps -> {
+               try {
+                  ps.setString(1, entity.getCorreo());
+                  ps.setString(2, entity.getContraseña());
+                  ps.setString(3, entity.getUsuario());
+                  ps.setString(4, entity.getCargo());
+               } catch (SQLException e) {
+                  throw new RuntimeException("Error al configurar usuario: " + e.getMessage(), e);
+               }
+            }
+         );
+
+         // Verificar que se insertó correctamente
+         if (usuarioId[0] == 0) {
+            JOptionPane.showMessageDialog(null,
+               "Error: No se pudo crear el un empleado en el sistema.",
+               "Error",
+               JOptionPane.ERROR_MESSAGE);
+            return 0;
+         }
+
+         // PASO 3: Solicitar y validar datos personales
+         entity.setNombre(validar.ValidarTexto(insertar.Nombre()));
+         entity.setNombre2(validar.ValidarOpcional(insertar.Nombre2()));
+         entity.setApellido(validar.ValidarTexto(insertar.Apellido()));
+         entity.setApellido2(validar.ValidarOpcional(insertar.Apellido2()));
+         entity.setDocumento(validar.ValidarDocumento(insertar.Cedula()));
+         entity.setTelefono(validar.ValidarTelefonoU(insertar.Telefono()));
+         entity.setSueldo(validarNumero.solicitarDouble(insertar.valorSalario(), 1000000000));     // Validar y convertir la fecha de nacimiento
+         String fechaNacimientoStr = insertar.FechaNacimiento();
+         LocalDate fechaNacimiento = validar.ValidarFechaNacimiento(fechaNacimientoStr);
+
+         if (fechaNacimiento == null) {
+            JOptionPane.showMessageDialog(null,
+               "Fecha de nacimiento no válida. No se guardará el cliente.");
+            return 0;
+         }
+
+         entity.setFechaNacimiento(fechaNacimiento);
+
+         // PASO 4: Insertar en tabla informacion con el usuario_id_fk
+         int resultado = conexion.ejecutar(dato, ps -> {
+            try {
+               ps.setString(1, entity.getNombre());
+               ps.setString(2, entity.getNombre2());
+               ps.setString(3, entity.getApellido());
+               ps.setString(4, entity.getApellido2());
+               ps.setString(5, entity.getDocumento());
+               ps.setString(6, entity.getTelefono());
+               ps.setDouble(8, entity.getSueldo());
+               ps.setObject(9, entity.getFechaNacimiento());
+               ps.setInt(10, usuarioId[0]); // ← AQUÍ SE USA EL ID DEL USUARIO
+            } catch (SQLException e) {
+               throw new RuntimeException("Error al guardar información personal: " + e.getMessage(), e);
+            }
+         });
+
+         if (resultado > 0) {
+            JOptionPane.showMessageDialog(null,
+               "✅ Usuario registrado correctamente\n" +
+               "ID de Usuario: " + usuarioId[0] + "\n" +
+               "Usuario: " + entity.getUsuario(),
+               "Registro Exitoso",
+               JOptionPane.INFORMATION_MESSAGE);
+         }
+
+         return resultado;
+
+      } catch (Exception e) {
+         e.printStackTrace();
+         JOptionPane.showMessageDialog(null,
+            "Error al guardar el cliente: " + e.getMessage(),
+            "Error",
+            JOptionPane.ERROR_MESSAGE);
+         return 0;
+      }
    }
 
    @Override

@@ -1,6 +1,5 @@
 package proyecto.crud;
 
-import java.util.List;
 
 public interface CrudEntity<T> {
 
