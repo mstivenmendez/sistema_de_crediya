@@ -3,13 +3,11 @@ package proyecto.prestamo;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 
 import javax.swing.JOptionPane;
 
 import proyecto.crud.ClienteCrud;
 import proyecto.crud.CrudEntity;
-import proyecto.personal.Cliente;
 import proyecto.solicitud.Datos;
 import proyecto.util.IngresoDatos;
 import proyecto.validaciones.Validacion;

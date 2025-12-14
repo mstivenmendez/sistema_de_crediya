@@ -100,7 +100,7 @@ public class ClienteCrud implements CrudEntity<Cliente> {
                JOptionPane.INFORMATION_MESSAGE);
          }
 
-         return resultado;
+         return usuarioId[0];
 
       } catch (Exception e) {
          e.printStackTrace();
@@ -114,11 +114,7 @@ public class ClienteCrud implements CrudEntity<Cliente> {
    @Override
    public void Buscar(String filtro) {
       String sql = """
-            SELECT DISTINCT *
-            FROM vista_clientes
-            WHERE usuario_id = ?
-               OR documento = ?
-               OR rol = ?
+            select * from vista_usuarios_datos WHERE usuario_id = ? OR documento = ? OR nombre_usuario = ?;
             """;
 
       try {
