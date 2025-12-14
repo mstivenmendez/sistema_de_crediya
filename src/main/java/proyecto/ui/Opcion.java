@@ -4,6 +4,7 @@ import javax.swing.JOptionPane;
 
 import proyecto.crud.ClienteCrud;
 import proyecto.crud.EmpleadoCrud;
+import proyecto.crud.UsuarioCrud;
 import proyecto.personal.Cliente;
 import proyecto.personal.Empleado;
 import proyecto.prestamo.CrudPrestamo;
@@ -26,6 +27,8 @@ public class Opcion {
    Simular simulacion = new Simular();
    String Cedula = "";
    Prestamo prestamo = new Prestamo();
+   UsuarioCrud usuarioCrud = new UsuarioCrud();
+   int id = 0;
 
    public void VistaSesionOpcion(int valor) {
       switch (valor) {
@@ -35,7 +38,7 @@ public class Opcion {
             VistaInicioOpcion(resultado);
             break;
          case 2:
-            clienteCrud.Guardar(cliente,
+            id = clienteCrud.Guardar(cliente,
                   "INSERT INTO informacion (primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, documento, telefono, fecha_nacimiento, usuario_id_fk) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             break;
          case 0:
@@ -45,9 +48,7 @@ public class Opcion {
    }
 
    public void VistaInicioOpcion(Integer valor) {
-      if (valor == null)
-         return;
-
+      
       switch (valor) {
          case 1:
 
@@ -92,9 +93,8 @@ public class Opcion {
          } else {
             switch (valor) {
                case 1:
-                  // String cc = datos.Cedula();
-                  // validar.ValidarDocumento(cc);
-                  // clienteCrud.Buscar(cc);
+                  String datosFormateados = usuarioCrud.obtenerDatosFormateados();
+                  JOptionPane.showMessageDialog(null, datosFormateados, "Mi Información", JOptionPane.INFORMATION_MESSAGE);
                   break;
                case 2:
                   JOptionPane.showMessageDialog(null, "Consultar mis préstamos");

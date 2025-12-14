@@ -9,6 +9,7 @@ import javax.swing.JOptionPane;
 import proyecto.conector.ConexionDB;
 import proyecto.solicitud.Datos;
 import proyecto.util.IngresoDatos;
+import proyecto.util.SesionUsuario;
 
 public class ValidacionUsuario {
 
@@ -20,7 +21,6 @@ public class ValidacionUsuario {
     * Valida si existe un usuario con las credenciales proporcionadas
     *
     * @param nombreUsuario Nombre de usuario
-    * @param clave         Contraseña del usuario
     * @param clave         Contraseña del usuario
     * @return true si el usuario existe y las credenciales son correctas
     */
@@ -53,6 +53,12 @@ public class ValidacionUsuario {
                   e.printStackTrace();
                }
             });
+      
+      // Guardar el usuario_id en la sesión si las credenciales son válidas
+      if (existe[0]) {
+         SesionUsuario.setUsuarioId(userId[0]);
+      }
+      
       return existe[0];
    }
 

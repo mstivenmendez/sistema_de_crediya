@@ -1,12 +1,6 @@
 package proyecto;
-
 import java.sql.SQLException;
-
-import proyecto.conector.ConexionDB;
-import proyecto.crud.ClienteCrud;
-import proyecto.personal.Cliente;
 import proyecto.ui.Inicio;
-import proyecto.util.IngresoDatos;
 
 
 public class Main {

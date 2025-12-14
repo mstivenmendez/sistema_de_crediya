@@ -1,6 +1,5 @@
 package proyecto.prestamo;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class Prestamo {
