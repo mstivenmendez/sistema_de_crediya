@@ -12,6 +12,7 @@ import proyecto.prestamo.Prestamo;
 import proyecto.validaciones.*;
 import proyecto.solicitud.Datos;
 import proyecto.util.Simular;
+import proyecto.util.SesionUsuario;
 
 public class Opcion {
    Menu ingreso = new Menu();
@@ -97,7 +98,7 @@ public class Opcion {
                   JOptionPane.showMessageDialog(null, datosFormateados, "Mi Información", JOptionPane.INFORMATION_MESSAGE);
                   break;
                case 2:
-                  JOptionPane.showMessageDialog(null, "Consultar mis préstamos");
+                  crudPrestamo.buscarMisPrestamos();
                   break;
                case 3:
                   JOptionPane.showMessageDialog(null, "Ver mis pagos");
@@ -298,7 +299,9 @@ public class Opcion {
             JOptionPane.showMessageDialog(null, "Préstamos activos");
             break;
          case 2:
-            JOptionPane.showMessageDialog(null, "Préstamos vencidos");
+            // Generar reporte de préstamos aprobados por este empleado
+            int empleadoId = SesionUsuario.getUsuarioId();
+            crudPrestamo.buscarPrestamosAprobadosPorEmpleado(empleadoId);
             break;
          case 3:
             JOptionPane.showMessageDialog(null, "Clientes morosos");
