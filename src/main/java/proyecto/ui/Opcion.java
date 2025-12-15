@@ -5,10 +5,13 @@ import javax.swing.JOptionPane;
 import proyecto.crud.ClienteCrud;
 import proyecto.crud.EmpleadoCrud;
 import proyecto.crud.UsuarioCrud;
+import proyecto.pagos.CrudPago;
+import proyecto.pagos.Pago;
 import proyecto.personal.Cliente;
 import proyecto.personal.Empleado;
 import proyecto.prestamo.CrudPrestamo;
 import proyecto.prestamo.Prestamo;
+import proyecto.reportes.Reportes;
 import proyecto.validaciones.*;
 import proyecto.solicitud.Datos;
 import proyecto.util.Simular;
@@ -28,7 +31,10 @@ public class Opcion {
    String Cedula = "";
    Prestamo prestamo = new Prestamo();
    UsuarioCrud usuarioCrud = new UsuarioCrud();
+   CrudPago crudPago = new CrudPago();
    int id = 0;
+   Pago pago = new Pago();
+   Reportes reportes = new Reportes();
 
    public void VistaSesionOpcion(int valor) {
       switch (valor) {
@@ -48,7 +54,7 @@ public class Opcion {
    }
 
    public void VistaInicioOpcion(Integer valor) {
-      
+
       switch (valor) {
          case 1:
 
@@ -281,12 +287,13 @@ public class Opcion {
    public void VistaGestionPagosOpcion(int valor) {
       switch (valor) {
          case 1:
-            JOptionPane.showMessageDialog(null, "Registrar pago");
+            crudPago.Guardar(pago, "INSERT INTO N" );
             break;
          case 2:
-            JOptionPane.showMessageDialog(null, "Consultar historial de pagos");
+            crudPago.Buscar("jhlj");
             break;
          case 3:
+            crudPago.BuscarActivos("hgfdkjfd");
             JOptionPane.showMessageDialog(null, "Ver saldo pendiente");
             break;
       }
@@ -295,12 +302,15 @@ public class Opcion {
    public void VistaGestionReportesOpcion(int valor) {
       switch (valor) {
          case 1:
+            reportes.BuscarEstado("activo");
             JOptionPane.showMessageDialog(null, "Préstamos activos");
             break;
          case 2:
+            reportes.BuscarEstado("activo");
             JOptionPane.showMessageDialog(null, "Préstamos vencidos");
             break;
          case 3:
+            reportes.BuscarEstado("activo");
             JOptionPane.showMessageDialog(null, "Clientes morosos");
             break;
          case 4:
