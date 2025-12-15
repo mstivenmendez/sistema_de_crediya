@@ -26,14 +26,14 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
    ClienteCrud buscar = new ClienteCrud();
    ValidacionUsuario usuario = new ValidacionUsuario();
 
-   public void Buscar(String filtro) {
-      // Redirige al método que ya tienes implementado
-      buscarPrestamosPorDocumento(filtro);
-   }
-
    public void buscarMisPrestamos() {
       int usuarioId = SesionUsuario.getUsuarioId();
       buscarPrestamosPorUsuarioId(usuarioId);
+   }
+
+   public void buscarEmpleado(){
+      int idEmpleado = SesionUsuario.getUsuarioId();
+      buscarPrestamosAprobadosPorEmpleado(idEmpleado);
    }
 
    @Override
@@ -112,7 +112,7 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
    /**
     * Busca préstamos por usuario_id usando el procedimiento almacenado
     * Método privado usado internamente
-    * 
+    *
     * @param usuarioId ID del usuario/cliente
     */
    private void buscarPrestamosPorUsuarioId(int usuarioId) {
@@ -205,7 +205,7 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
 
    /**
     * Busca los préstamos que ha aprobado un empleado y genera un archivo .txt
-    * 
+    *
     * @param empleadoUsuarioId ID del empleado que aprobó los préstamos
     */
    public void buscarPrestamosAprobadosPorEmpleado(int empleadoUsuarioId) {
@@ -302,16 +302,16 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
    /**
     * Genera un archivo .txt con los préstamos del usuario
     */
-   private void generarArchivoMisPrestamos(String contenido) {
+   public void generarArchivoMisPrestamos(String contenido) {
       try {
          String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
          int usuarioId = SesionUsuario.getUsuarioId();
          String nombreArchivo = "MisPrestamos_Usuario" + usuarioId + "_" + timestamp + ".txt";
-         
+
          try (FileWriter writer = new FileWriter(nombreArchivo)) {
             writer.write(contenido);
          }
-         
+
          System.out.println("Archivo generado: " + nombreArchivo);
       } catch (IOException e) {
          e.printStackTrace();
@@ -325,16 +325,16 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
    /**
     * Genera un archivo .txt con los préstamos aprobados por un empleado
     */
-   private void generarArchivoPrestamosAprobados(String contenido) {
+   public void generarArchivoPrestamosAprobados(String contenido) {
       try {
          String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
          int empleadoId = SesionUsuario.getUsuarioId();
          String nombreArchivo = "PrestamosAprobados_Empleado" + empleadoId + "_" + timestamp + ".txt";
-         
+
          try (FileWriter writer = new FileWriter(nombreArchivo)) {
             writer.write(contenido);
          }
-         
+
          System.out.println("Archivo generado: " + nombreArchivo);
       } catch (IOException e) {
          e.printStackTrace();
@@ -343,6 +343,84 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
                "Error",
                JOptionPane.ERROR_MESSAGE);
       }
+   }
+
+   @Override
+   public void Buscar(String filtro) {
+      String sql = """
+            SELECT DISTINCT *
+            FROM vista_prestamos
+            WHERE cliente_usuario_id_fk = ?
+               OR empleado_usuario_id_fk = ?
+               OR estado = ?
+            """;
+
+      try {
+
+         seleccionar(sql, rs -> {
+            StringBuilder sb = new StringBuilder();
+            boolean hayResultados = false;
+            int contador = 0;
+
+            // Procesar todos los resultados
+            while (rs.next()) {
+               hayResultados = true;
+               contador++;
+               sb.append("PRESTAMOS # ").append(contador).append("\n");
+               sb.append("Cédula: ").append(rs.getString("documento")).append("\n");
+               sb.append("Nombre: ").append(rs.getString("primer_nombre")).append(" ").append(rs.getString("segundo_nombre")).append("\n");
+               sb.append("apellido: ").append(rs.getString("primer_apellido")).append(" ").append(rs.getString("segundo_apellido")).append("\n");
+               sb.append("Valor: ").append(rs.getString("valor")).append("\n");
+               sb.append("valor Pendiente: ").append(rs.getString("valor_pendiente")).append("\n");
+               sb.append("Fecha de inicio: ").append(rs.getString("fecha_inicio")).append("\n");
+               sb.append("Fecha Limite: ").append(rs.getDouble("fecha_limite")).append("\n");
+               sb.append("---------------------------\n");
+            }
+
+            if (!hayResultados) {
+               JOptionPane.showMessageDialog(null,
+                     "No se encontraron resultados.");
+            } else {
+               JOptionPane.showMessageDialog(null, sb.toString());
+            }
+         },
+               ps -> {
+                  Integer id = null;
+                  try {
+                     id = Integer.parseInt(filtro);
+                  } catch (NumberFormatException e) {
+                     // Si no es número, id quedará null
+                  }
+                  ps.setInt(1, id != null ? id : -1);
+                  ps.setInt(2, id != null ? id : -1);
+                  ps.setString(3, filtro);
+               });
+
+      } catch (SQLException e) {
+         JOptionPane.showMessageDialog(null,
+               "Error al buscar clientes: " + e.getMessage());
+         e.printStackTrace();
+      }
+   }
+
+
+
+   private void seleccionar(String sql,
+         ResultSetConsumer rsConsumer,
+         PreparedStatementConsumer psConsumer) throws SQLException {
+      // Implementación del método que ejecuta la consulta
+      // y llama a los consumers apropiados
+   }
+
+   // Interfaces funcionales para los lambdas
+   @FunctionalInterface
+   interface ResultSetConsumer {
+      void accept(ResultSet rs) throws SQLException;
+   }
+
+   @FunctionalInterface
+   interface PreparedStatementConsumer {
+      void accept(PreparedStatement ps) throws SQLException;
    }
 
 }

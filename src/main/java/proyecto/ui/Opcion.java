@@ -5,6 +5,7 @@ import javax.swing.JOptionPane;
 import proyecto.crud.ClienteCrud;
 import proyecto.crud.EmpleadoCrud;
 import proyecto.crud.UsuarioCrud;
+import proyecto.notificacion.Notificacion;
 import proyecto.pagos.CrudPago;
 import proyecto.pagos.Pago;
 import proyecto.personal.Cliente;
@@ -36,6 +37,8 @@ public class Opcion {
    int id = 0;
    Pago pago = new Pago();
    Reportes reportes = new Reportes();
+   Notificacion notificacion = new Notificacion();
+
 
    public void VistaSesionOpcion(int valor) {
       switch (valor) {
@@ -68,11 +71,17 @@ public class Opcion {
             break;
          case 2:
             // Bucle para mantener en el menú de administrador
-            boolean esValid = validacionUsuario.ValidacionAdminExistente();
-
-            if (esValid) {
-
-               VistaAdministradorOpcion(numero.solicitarEntero(ingreso.VistaAdministrador(), 5));
+            boolean continuarAdmin = validacionUsuario.ValidacionAdminExistente();
+            while (continuarAdmin ) {
+               Integer opcionAdmin = numero.solicitarEntero(ingreso.VistaAdministrador(), 5);
+               if (opcionAdmin == null)
+                  continue;
+               if (opcionAdmin == 0) {
+                  JOptionPane.showMessageDialog(null, "Regresando al menú principal...");
+                  continuarAdmin = false;
+               } else {
+                  VistaAdministradorOpcion(opcionAdmin);
+               }
             }
             break;
          case 0:
@@ -157,7 +166,7 @@ public class Opcion {
             // Bucle para gestión de préstamos
             boolean continuarPrestamos = true;
             while (continuarPrestamos) {
-               Integer opcion = numero.solicitarEntero(ingreso.VistaGestionPrestamos(), 3);
+               Integer opcion = numero.solicitarEntero(ingreso.VistaGestionPrestamos(), 2);
                if (opcion == null)
                   continue;
                if (opcion == 0) {
@@ -254,6 +263,10 @@ public class Opcion {
          case 2:
             clienteCrud.Buscar("cliente");
          case 3:
+            String cedula1 = validar.ValidarDocumento(datos.Cedula());
+            if (validacionUsuario.ValidarCedula(cedula1)) {
+               crudPrestamo.Buscar(cedula1);
+            }
             break;
       }
    }
@@ -263,6 +276,9 @@ public class Opcion {
          case 1:
             crudPrestamo.Guardar(prestamo,
                   "INSERT INTO prestamo (cliente_usuario_id_fk, empleado_usuario_id_fk, valor, interes, cuotas ) VALUES(?, ?, ?, ?, ?)");
+            crudPago.VerNumeroPrestamo(prestamo, datos.CedulaUsuario());
+            String ingrese = datos.NumeroPrestamo();
+            crudPago.GenerarCuotas(prestamo, ingrese);
             break;
          case 2:
             // Listar todos los préstamos que ha aprobado este empleado
@@ -293,8 +309,7 @@ public class Opcion {
    public void VistaGestionReportesOpcion(int valor) {
       switch (valor) {
          case 1:
-            reportes.BuscarEstado("activo");
-            JOptionPane.showMessageDialog(null, "Préstamos activos");
+            crudPrestamo.Buscar("activo");
             break;
          case 2:
             // Generar reporte de préstamos aprobados por este empleado
@@ -302,16 +317,16 @@ public class Opcion {
             crudPrestamo.buscarPrestamosAprobadosPorEmpleado(empleadoId);
             break;
          case 3:
-            reportes.BuscarEstado("activo");
-            JOptionPane.showMessageDialog(null, "Clientes morosos");
+            crudPrestamo.Buscar("mora");
             break;
          case 4:
-            JOptionPane.showMessageDialog(null, "Generar reporte automático");
+            reportes.notificacionPersonalizada(notificacion,"INSERT");
             break;
          case 5:
-            JOptionPane.showMessageDialog(null, "Historial completo de préstamos");
+            reportes.BuscarPrestamosReporte("");
             break;
       }
    }
+
 
 }
