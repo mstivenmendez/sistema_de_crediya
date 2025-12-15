@@ -68,17 +68,11 @@ public class Opcion {
             break;
          case 2:
             // Bucle para mantener en el menú de administrador
-            boolean continuarAdmin = true;
-            while (continuarAdmin) {
-               Integer opcionAdmin = numero.solicitarEntero(ingreso.VistaAdministrador(), 5);
-               if (opcionAdmin == null)
-                  continue;
-               if (opcionAdmin == 0) {
-                  JOptionPane.showMessageDialog(null, "Regresando al menú principal...");
-                  continuarAdmin = false;
-               } else {
-                  VistaAdministradorOpcion(opcionAdmin);
-               }
+            boolean esValid = validacionUsuario.ValidacionAdminExistente();
+
+            if (esValid) {
+
+               VistaAdministradorOpcion(numero.solicitarEntero(ingreso.VistaAdministrador(), 5));
             }
             break;
          case 0:
@@ -113,12 +107,9 @@ public class Opcion {
                   JOptionPane.showMessageDialog(null, "Realizar un pago");
                   break;
                case 5:
-                  JOptionPane.showMessageDialog(null, "Realizar Solicitud De Préstamo");
-                  break;
-               case 6:
                   simulacion.ejecutarSimulacion();
                   break;
-               case 7:
+               case 6:
                   JOptionPane.showMessageDialog(null, "Reportes (notificaciones)");
                   break;
             }
@@ -274,10 +265,9 @@ public class Opcion {
                   "INSERT INTO prestamo (cliente_usuario_id_fk, empleado_usuario_id_fk, valor, interes, cuotas ) VALUES(?, ?, ?, ?, ?)");
             break;
          case 2:
-            String cedula1 = validar.ValidarDocumento(datos.Cedula());
-            if (validacionUsuario.ValidarCedula(cedula1)) {
-               crudPrestamo.Buscar(cedula1);
-            }
+            // Listar todos los préstamos que ha aprobado este empleado
+            int empleadoId = SesionUsuario.getUsuarioId();
+            crudPrestamo.buscarPrestamosAprobadosPorEmpleado(empleadoId);
             break;
          case 3:
             JOptionPane.showMessageDialog(null, "Cambiar estado del préstamo");
@@ -307,7 +297,6 @@ public class Opcion {
             JOptionPane.showMessageDialog(null, "Préstamos activos");
             break;
          case 2:
-            reportes.BuscarEstado("activo");
             // Generar reporte de préstamos aprobados por este empleado
             int empleadoId = SesionUsuario.getUsuarioId();
             crudPrestamo.buscarPrestamosAprobadosPorEmpleado(empleadoId);

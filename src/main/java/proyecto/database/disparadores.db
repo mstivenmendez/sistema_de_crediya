@@ -1,0 +1,46 @@
+DELIMITER $$
+
+CREATE TRIGGER trg_prestamo_autocalculo
+BEFORE INSERT ON prestamo
+FOR EACH ROW
+BEGIN
+  DECLARE tasa_mensual DECIMAL(18,10);
+  DECLARE factor DECIMAL(18,10);
+  DECLARE pago_mensual DECIMAL(18,10);
+
+  -- 0) Numero de prestamo (VARCHAR)
+  SET NEW.numero_prestamo = CONCAT(
+      LPAD(FLOOR(RAND() * 1000000), 6, '0')
+  );
+
+  -- 1) Si no envían fecha_inicio, usar NOW()
+  IF NEW.fecha_inicio IS NULL THEN
+    SET NEW.fecha_inicio = NOW();
+  END IF;
+
+  -- 2) fecha_limite = fecha_inicio + cuotas meses
+  SET NEW.fecha_limite = DATE_ADD(NEW.fecha_inicio, INTERVAL NEW.cuotas MONTH);
+
+  -- 3) cuota_pendiente = cuotas
+  SET NEW.cuota_pendiente = NEW.cuotas;
+
+  -- 4) Fórmula amortización (interés anual → mensual)
+  SET tasa_mensual = (NEW.interes / 100) / 12;
+
+  IF tasa_mensual = 0 THEN
+    SET pago_mensual = NEW.valor / NEW.cuotas;
+  ELSE
+    SET factor = POW(1 + tasa_mensual, NEW.cuotas);
+    SET pago_mensual = (NEW.valor * tasa_mensual * factor) / (factor - 1);
+  END IF;
+
+  -- 5) Guardar valor de cada cuota
+  SET NEW.valor_cuota = ROUND(pago_mensual, 2);
+
+  -- 6) valor_total y valor_pendiente
+  SET NEW.valor_total = ROUND(pago_mensual * NEW.cuotas, 2);
+  SET NEW.valor_pendiente = NEW.valor_total;
+
+END$$
+
+DELIMITER ;

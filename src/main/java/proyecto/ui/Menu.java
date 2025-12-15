@@ -38,9 +38,8 @@ public class Menu {
                   + "2. Consultar mis préstamos 💰\n"
                   + "3. Ver mis pagos 💵📄\n"
                   + "4. Realizar un pago 🧾💳\n"
-                  + "5. Realizar Solicitud De Pretamo 💵\n"
-                  + "6. Simulacion Prestamo 🔁🔄\n"
-                  + "7. Reportes (notificaciones) 🔔 \n"
+                  + "5. Simulacion Prestamo 🔁🔄\n"
+                  + "6. Reportes (notificaciones) 🔔 \n"
                   + "0. Cerrar Sesion 🔙\n");
       return ingreso;
    }

@@ -46,12 +46,11 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
                int id = usuario.validarCedulaYObtener(cedula);
                entity.setClienteUsuarioId(id);
                ps.setInt(1, entity.getClienteUsuarioId());
-               String cedulaEmpleado = validar.ValidarDocumento(insertar.Cedula());
+               String cedulaEmpleado = validar.ValidarDocumento(insertar.CedulaEmpleado());
                if (usuario.ValidarCedula(cedulaEmpleado)) {
                   int idEmpleado = usuario.validarCedulaYObtener(cedulaEmpleado);
                   entity.setEmpleadoUsuarioId(idEmpleado);
                   entity.setValor(numero.solicitarDouble(insertar.valorPrestamo(), 1000000000));
-                  entity.setInteres(numero.solicitarDouble(insertar.IdPrestamo(), 100));
                   entity.setCuotas(numero.solicitarEntero(insertar.valorCuotas(), 240));
 
                   ps.setInt(1, entity.getClienteUsuarioId());
@@ -242,7 +241,8 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
                      sb.append("║  PRÉSTAMO #").append(contador).append("\n");
                      sb.append("╠════════════════════════════════════════════════╣\n");
                      sb.append("  ID Préstamo      : ").append(rs.getInt("prestamo_id")).append("\n");
-                     sb.append("  Cliente          : ").append(rs.getString("cliente_nombre")).append("\n");
+                     sb.append("  Nombre           : ").append(rs.getString("primer_nombre")).append(" ").append(rs.getString("segundo_nombre")).append("\n");
+                     sb.append("  apellido         : ").append(rs.getString("primer_apellido")).append(" ").append(rs.getString("segundo_apellido")).append("\n");
                      sb.append("  Documento Cliente: ").append(rs.getString("cliente_documento")).append("\n");
                      sb.append("  Valor Préstamo   : $").append(String.format("%,.2f", valor)).append("\n");
                      sb.append("  Valor Total      : $").append(String.format("%,.2f", valorTotal)).append("\n");

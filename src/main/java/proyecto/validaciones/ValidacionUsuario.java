@@ -185,14 +185,16 @@ public class ValidacionUsuario {
 
          // Validar que sea administrador
          final boolean[] esAdmin = { false };
+         final int[] userId = { 0 };
 
-         String sql = "SELECT nombre_usuario, clave, rol FROM usuario WHERE nombre_usuario = ? AND clave = ? AND rol = 'ADMIN'";
+         String sql = "SELECT usuario_id, nombre_usuario, clave, rol FROM usuario WHERE nombre_usuario = ? AND clave = ? AND rol = 'empleado'";
 
          conexion.seleccionar(sql,
                rs -> {
                   try {
                      if (rs.next()) {
                         esAdmin[0] = true;
+                        userId[0] = rs.getInt("usuario_id");
                      }
                   } catch (Exception e) {
                      e.printStackTrace();
@@ -208,6 +210,8 @@ public class ValidacionUsuario {
                });
 
          if (esAdmin[0]) {
+            // Guardar el usuario_id en la sesión
+            SesionUsuario.setUsuarioId(userId[0]);
             JOptionPane.showMessageDialog(null,
                   "✅ Acceso de Administrador concedido\n¡Bienvenido Admin " + usuarioValidado + "!",
                   "Acceso Administrativo",
