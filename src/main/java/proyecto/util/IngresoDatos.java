@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import javax.swing.JOptionPane;
 import proyecto.conector.ConexionDB;
 import java.sql.Statement;
+import java.sql.CallableStatement;
 
 public class IngresoDatos {
 
@@ -67,6 +68,31 @@ public class IngresoDatos {
          JOptionPane.showMessageDialog(null, "Error al obtener ID: " + e.getMessage(),
                "Error", JOptionPane.ERROR_MESSAGE);
          return 0;
+      }
+   }
+
+   public void ejecutarProcedimiento(String nombreProcedimiento,
+         Consumer<ResultSet> lector,
+         Consumer<CallableStatement> configuracion) {
+
+      String sql = "{CALL " + nombreProcedimiento + "}";
+
+      try (Connection con = ConexionDB.conectar();
+            CallableStatement cs = con.prepareCall(sql)) {
+
+         // Configurar parámetros de entrada
+         configuracion.accept(cs);
+
+         // Ejecutar y procesar resultados
+         try (ResultSet rs = cs.executeQuery()) {
+            lector.accept(rs);
+         }
+
+      } catch (Exception e) {
+         e.printStackTrace();
+         JOptionPane.showMessageDialog(null,
+               "Error al ejecutar procedimiento: " + e.getMessage(),
+               "Error", JOptionPane.ERROR_MESSAGE);
       }
    }
 
