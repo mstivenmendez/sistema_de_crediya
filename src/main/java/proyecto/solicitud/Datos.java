@@ -150,4 +150,11 @@ public class Datos {
          "POr favor ingrese su numero de documento del empleado que va hacer el credito\n");
       return cedula;
    }
+
+   public String PagarCuota() {
+      String cedula = JOptionPane.showInputDialog(null,
+         " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
+         "POr favor ingrese el valor que desea pagar\n");
+      return cedula;
+   }
 }

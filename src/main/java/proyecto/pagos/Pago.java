@@ -1,20 +1,19 @@
 package proyecto.pagos;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class Pago {
 
    private int pagoId;
    private int prestamoIdFk;
-   private BigDecimal valor;
-   private LocalDateTime fechaPago; 
+   private Double valor;
+   private LocalDateTime fechaPago;
    private EstadoPago estado;
 
    public Pago() {
    }
 
-   public Pago(int pagoId, int prestamoIdFk, BigDecimal valor, LocalDateTime fechaPago, EstadoPago estado) {
+   public Pago(int pagoId, int prestamoIdFk, Double valor, LocalDateTime fechaPago, EstadoPago estado) {
       this.pagoId = pagoId;
       this.prestamoIdFk = prestamoIdFk;
       this.valor = valor;
@@ -39,11 +38,11 @@ public class Pago {
       this.prestamoIdFk = prestamoIdFk;
    }
 
-   public BigDecimal getValor() {
+   public Double getValor() {
       return valor;
    }
 
-   public void setValor(BigDecimal valor) {
+   public void setValor(Double valor) {
       this.valor = valor;
    }
 

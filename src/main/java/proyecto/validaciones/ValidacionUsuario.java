@@ -53,18 +53,18 @@ public class ValidacionUsuario {
                   e.printStackTrace();
                }
             });
-      
+
       // Guardar el usuario_id en la sesión si las credenciales son válidas
       if (existe[0]) {
          SesionUsuario.setUsuarioId(userId[0]);
       }
-      
+
       return existe[0];
    }
 
    /**
     * Valida si existe un usuario y solicita las credenciales con validación
-    * 
+    *
     *
     * @return true si el usuario existe y las credenciales son válidas
     */
@@ -510,69 +510,39 @@ public class ValidacionUsuario {
 
       return existe[0];
    }
+
+   public Integer ObtenerIdPrestamo(int id_usuario) {
+      // Consultar desde la vista que tiene usuario_id_fk
+      String sql = "SELECT `prestamo_id FROM pestamo WHERE cliente_usuario_id_fk = ?";
+
+      final Integer[] prestamoId = { null };
+
+      conexion.seleccionar(sql,
+            rs -> {
+               try {
+                  if (rs.next()) {
+                     prestamoId[0] = rs.getInt("`prestamo_id");
+                  }
+               } catch (Exception e) {
+                  e.printStackTrace();
+               }
+            },
+            ps -> {
+               try {
+                  ps.setInt(1, id_usuario);
+               } catch (Exception e) {
+                  e.printStackTrace();
+               }
+            });
+
+      // Mostrar mensaje si NO existe el documento
+      if (prestamoId[0] == null) {
+         JOptionPane.showMessageDialog(null,
+               "El documento '" + id_usuario + "' no está registrado en el sistema.",
+               "Documento no encontrado",
+               JOptionPane.WARNING_MESSAGE);
+      }
+      return prestamoId[0];
+   }
 }
 
-// ============================================
-// 2. Datos.java - MÉTODOS AGREGADOS
-// ============================================
-/*
- * Agregar estos métodos a tu clase Datos.java existente:
- *
- * public String EnterPassword() {
- * String valorPasswordString = JOptionPane.showInputDialog(null,
- * " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
- * "Ingresa tu contraseña: ");
- * return valorPasswordString;
- * }
- *
- * public String EnterUser() {
- * String valorUserString = JOptionPane.showInputDialog(null,
- * " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n" +
- * "Ingresa tu Usuario: ");
- * return valorUserString;
- * }
- */
-
-// ============================================
-// 3. Opcion.java - SIN CAMBIOS
-// ============================================
-/*
- * Tu archivo Opcion.java sigue funcionando igual:
- *
- * public void VistaInicioOpcion(Integer valor) {
- * if (valor == null)
- * return;
- *
- * switch (valor) {
- * case 1:
- * // Inicio de sesión como usuario
- * if (validacionUsuario.ValidacionUsuarioExistente()) {
- * // Si el login es exitoso, mostrar menú de usuario
- * VistaUsuarioOpcion(numero.solicitarEntero(ingreso.VistaUsuario(), 7));
- * }
- * break;
- * case 2:
- * // Inicio de sesión como administrador
- * if (validacionUsuario.ValidacionAdminExistente()) {
- * // Si el login es exitoso, mostrar menú de administrador
- * boolean continuarAdmin = true;
- * while (continuarAdmin) {
- * Integer opcionAdmin = numero.solicitarEntero(ingreso.VistaAdministrador(),
- * 5);
- * if (opcionAdmin == null)
- * continue;
- * if (opcionAdmin == 0) {
- * JOptionPane.showMessageDialog(null, "Cerrando sesión de administrador...");
- * continuarAdmin = false;
- * } else {
- * VistaAdministradorOpcion(opcionAdmin);
- * }
- * }
- * }
- * break;
- * case 0:
- * JOptionPane.showMessageDialog(null, "Regresando al menú principal...");
- * break;
- * }
- * }
- */
