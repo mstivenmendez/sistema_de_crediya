@@ -178,7 +178,7 @@ public class EmpleadoCrud implements CrudEntity<Empleado> {
 
    @Override
    public int Elimnar(Empleado entity, String sql, String id) {
-      String valor = "DELETE FROM cliente WHERE " + sql + " = ?";
+      String valor = "DELETE FROM usuario WHERE " + sql + " = ?";
 
       return conexion.ejecutar(valor, ps -> {
          try {

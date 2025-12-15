@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import javax.swing.JOptionPane;
 
 import proyecto.crud.ClienteCrud;
+import proyecto.notificacion.Notificacion;
 import proyecto.personal.Cliente;
 import proyecto.prestamo.Prestamo;
 import proyecto.solicitud.Datos;
@@ -25,16 +26,9 @@ public class Reportes {
    ValidarNumero numero = new ValidarNumero();
    ClienteCrud buscar = new ClienteCrud();
    ValidacionUsuario usuario = new ValidacionUsuario();
+   Notificacion notificacion = new Notificacion();
 
-   public void BuscarEstado(String dato) {
-      String sql = """
-            SELECT prestamos
-            FROM *
-            WHERE cliente_id = ?
-               OR cedula = ?
-               OR rol = ?
-            """;
-
+   public void BuscarPrestamosReporte(String sql) {
       try {
 
          seleccionar(sql, rs -> {
@@ -46,16 +40,19 @@ public class Reportes {
             while (rs.next()) {
                hayResultados = true;
                contador++;
-               sb.append("Pagos # ").append(contador).append("\n");
+               sb.append("Prestamo # ").append(contador).append("\n");
                sb.append("Cédula: ").append(rs.getString("documento")).append("\n");
                sb.append("Nombre: ").append(rs.getString("primer_nombre")).append(" ")
                      .append(rs.getString("segundo_nombre")).append("\n");
                sb.append("apellido: ").append(rs.getString("primer_apellido")).append(" ")
                      .append(rs.getString("segundo_apellido")).append("\n");
-               sb.append("Valor: ").append(rs.getString("valor")).append("\n");
-               sb.append("Numero del Prestamo: ").append(rs.getString("numero_prestamo")).append("\n");
+               sb.append("Numero Prestamo ").append(rs.getString("numero_prestamo")).append("\n");
+               sb.append("Valor Total: ").append(rs.getString("valor_total")).append("\n");
                sb.append("Fecha pago ").append(rs.getString("fecha_pago")).append("\n");
                sb.append("Valor Pendiente: ").append(rs.getString("valor_pendiente")).append("\n");
+               sb.append("Estado: ").append(rs.getString("estado")).append("\n");
+               sb.append("Cuotas Faltantes ").append(rs.getString("cuotas_pendientes")).append("\n");
+               sb.append("Cuotas Ha Pagar").append(rs.getString("cuotas")).append("\n");
                sb.append("---------------------------\n");
             }
 
@@ -67,15 +64,7 @@ public class Reportes {
             }
          },
                ps -> {
-                  Integer id = null;
-                  try {
-                     id = Integer.parseInt(dato);
-                  } catch (NumberFormatException e) {
-                     // Si no es número, id quedará null
-                  }
-                  ps.setInt(1, id != null ? id : -1);
-                  ps.setString(2, dato);
-                  ps.setString(3, dato);
+
                });
 
       } catch (SQLException e) {
@@ -83,6 +72,43 @@ public class Reportes {
                "Error al buscar clientes: " + e.getMessage());
          e.printStackTrace();
       }
+   }
+
+
+   public int notificacionPersonalizada(Notificacion entity, String sql) {
+      int resultado = conexion.ejecutar(sql, ps -> {
+         try {
+
+            String cedula = validar.ValidarDocumento(insertar.Cedula());
+            if (usuario.ValidarCedula(cedula)) {
+               int id = usuario.validarCedulaYObtener(cedula);
+               entity.setFk_usuario(id);
+               ps.setInt(1, entity.getFk_usuario());
+               String cedulaEmpleado = validar.ValidarDocumento(insertar.Cedula());
+               if (usuario.ValidarCedula(cedulaEmpleado)) {
+
+                  int idEmpleado = usuario.validarCedulaYObtener(cedulaEmpleado);
+                  entity.setFk_empleado(idEmpleado);
+                  entity.setNombre(insertar.Motivo());
+                  entity.setMensaje(insertar.Mensaje());
+
+                  ps.setInt(1, entity.getFk_usuario());
+                  ps.setInt(2, entity.getFk_empleado());
+                  ps.setString(3, entity.getNombre());
+                  ps.setString(4, entity.getMensaje());
+               }
+            }
+
+         } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Ocurrio un fallo en el registro");
+            throw new RuntimeException(e);
+         }
+      });
+
+      if (resultado > 0) {
+         JOptionPane.showMessageDialog(null, "La notificacion fue enviada ");
+      }
+      return resultado;
    }
 
      // Método auxiliar que debe estar implementado en la clase

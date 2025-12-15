@@ -8,18 +8,36 @@ public class Prestamo {
    private int clienteUsuarioId;
    private int empleadoUsuarioId;
    private Double valor;
+   private Double valorTotal;
+   public Double getValorTotal() {
+      return valorTotal;
+   }
+
+   public void setValorTotal(Double valorTotal) {
+      this.valorTotal = valorTotal;
+   }
+
    private Double interes;
    private int cuotas;
    private LocalDateTime fechaInicio;
    private LocalDateTime fechaLimite;
    private Estado estado;
+   private double valorCuota ;
+
+   public double getValorCuota() {
+      return valorCuota;
+   }
+
+   public void setValorCuota(double valorCuota) {
+      this.valorCuota = valorCuota;
+   }
 
    public Prestamo() {
    }
 
    public Prestamo(int prestamoId, int clienteUsuarioId, int empleadoUsuarioId, Double valor,
          Double interes, int cuotas, LocalDateTime fechaInicio,
-         LocalDateTime fechaLimite, Estado estado) {
+         LocalDateTime fechaLimite, Estado estado, double valorCuota,Double valorTotal) {
       this.prestamoId = prestamoId;
       this.clienteUsuarioId = clienteUsuarioId;
       this.empleadoUsuarioId = empleadoUsuarioId;
@@ -29,6 +47,8 @@ public class Prestamo {
       this.fechaInicio = fechaInicio;
       this.fechaLimite = fechaLimite;
       this.estado = estado;
+      this.valorCuota = valorCuota;
+      this.valorTotal = valorTotal;
    }
 
    // Getters y Setters

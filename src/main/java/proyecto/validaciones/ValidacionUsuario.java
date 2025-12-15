@@ -186,7 +186,7 @@ public class ValidacionUsuario {
          // Validar que sea administrador
          final boolean[] esAdmin = { false };
 
-         String sql = "SELECT nombre_usuario, clave, rol FROM usuario WHERE nombre_usuario = ? AND clave = ? AND rol = 'ADMIN'";
+         String sql = "SELECT nombre_usuario, clave, rol FROM usuario WHERE nombre_usuario = ? AND clave = ? AND rol = 'empleado'";
 
          conexion.seleccionar(sql,
                rs -> {
