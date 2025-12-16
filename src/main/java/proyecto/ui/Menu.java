@@ -103,6 +103,7 @@ public class Menu {
                   + " 🏦💰 Gestión de Prestamos 💰🏦 \n"
                   + "1. Crear préstamo ➕💰\n"
                   + "2. Listar préstamos 📋\n"
+                  + "3. generar plan cuotas ✏️\n"
                   + "0. Volver 🔙\n");
       return ingreso;
    }
