@@ -34,14 +34,14 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
    /**
     * Busca préstamos de un cliente específico por su usuario_id
     * Permite que administradores vean los préstamos de cualquier cliente
-    * 
+    *
     * @param usuarioId ID del usuario/cliente
     */
    public void buscarPrestamosDeCliente(int usuarioId) {
       buscarPrestamosPorUsuarioId(usuarioId);
    }
 
-   public void buscarEmpleado(){
+   public void buscarEmpleado() {
       int idEmpleado = SesionUsuario.getUsuarioId();
       buscarPrestamosAprobadosPorEmpleado(idEmpleado);
    }
@@ -254,8 +254,10 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
                      sb.append("╠════════════════════════════════════════════════╣\n");
                      sb.append("  ID Préstamo      : ").append(rs.getInt("prestamo_id")).append("\n");
                      sb.append("  Número Préstamo  : ").append(rs.getString("numero_prestamo")).append("\n");
-                     sb.append("  Nombre           : ").append(rs.getString("primer_nombre")).append(" ").append(rs.getString("segundo_nombre")).append("\n");
-                     sb.append("  apellido         : ").append(rs.getString("primer_apellido")).append(" ").append(rs.getString("segundo_apellido")).append("\n");
+                     sb.append("  Nombre           : ").append(rs.getString("primer_nombre")).append(" ")
+                           .append(rs.getString("segundo_nombre")).append("\n");
+                     sb.append("  apellido         : ").append(rs.getString("primer_apellido")).append(" ")
+                           .append(rs.getString("segundo_apellido")).append("\n");
                      sb.append("  Documento Cliente: ").append(rs.getString("cliente_documento")).append("\n");
                      sb.append("  Valor Préstamo   : $").append(String.format("%,.2f", valor)).append("\n");
                      sb.append("  Valor Total      : $").append(String.format("%,.2f", valorTotal)).append("\n");
@@ -279,7 +281,8 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
                      sb.append("                     RESUMEN\n");
                      sb.append("═══════════════════════════════════════════════════\n");
                      sb.append("  Total de Préstamos Aprobados : ").append(contador).append("\n");
-                     sb.append("  Suma Total Prestada          : $").append(String.format("%,.2f", totalValor)).append("\n");
+                     sb.append("  Suma Total Prestada          : $").append(String.format("%,.2f", totalValor))
+                           .append("\n");
                      sb.append("  Total Pendiente              : $").append(String.format("%,.2f", totalPendiente))
                            .append("\n");
                      sb.append("═══════════════════════════════════════════════════");
@@ -361,62 +364,121 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
    @Override
    public void Buscar(String filtro) {
       String sql = """
-            SELECT DISTINCT *
+            SELECT DISTINCT
+               prestamo_id,
+               numero_prestamo,
+               valor,
+               valor_total,
+               valor_pendiente,
+               interes,
+               cuotas,
+               estado,
+               fecha_inicio,
+               fecha_limite,
+               documento,
+               primer_nombre,
+               segundo_nombre,
+               primer_apellido,
+               segundo_apellido,
+               cliente_usuario_id_fk,
+               empleado_usuario_id_fk
             FROM vista_prestamos
             WHERE cliente_usuario_id_fk = ?
                OR empleado_usuario_id_fk = ?
                OR estado = ?
+               OR documento LIKE ?
+               OR CONCAT(primer_nombre, ' ', segundo_nombre) LIKE ?
+            ORDER BY fecha_inicio DESC
             """;
 
       try {
-
          seleccionar(sql, rs -> {
             StringBuilder sb = new StringBuilder();
             boolean hayResultados = false;
             int contador = 0;
+            double totalValor = 0;
+            double totalPendiente = 0;
+
+            sb.append("╔════════════════════════════════════════════════════════════════╗\n");
+            sb.append("║                  BÚSQUEDA DE PRÉSTAMOS                         ║\n");
+            sb.append("╚════════════════════════════════════════════════════════════════╝\n\n");
 
             // Procesar todos los resultados
             while (rs.next()) {
                hayResultados = true;
                contador++;
-               sb.append("PRESTAMOS # ").append(contador).append("\n");
-               sb.append("Cédula: ").append(rs.getString("documento")).append("\n");
-               sb.append("Nombre: ").append(rs.getString("primer_nombre")).append(" ").append(rs.getString("segundo_nombre")).append("\n");
-               sb.append("apellido: ").append(rs.getString("primer_apellido")).append(" ").append(rs.getString("segundo_apellido")).append("\n");
-               sb.append("Valor: ").append(rs.getString("valor")).append("\n");
-               sb.append("valor Pendiente: ").append(rs.getString("valor_pendiente")).append("\n");
-               sb.append("Fecha de inicio: ").append(rs.getString("fecha_inicio")).append("\n");
-               sb.append("Fecha Limite: ").append(rs.getDouble("fecha_limite")).append("\n");
-               sb.append("---------------------------\n");
+               double valor = rs.getDouble("valor");
+               double valorPendiente = rs.getDouble("valor_pendiente");
+               totalValor += valor;
+               totalPendiente += valorPendiente;
+
+               sb.append("───────────────────────────────────────────────────────────────\n");
+               sb.append("Préstamo # ").append(contador).append("\n");
+               sb.append("───────────────────────────────────────────────────────────────\n");
+               sb.append("ID Préstamo          : ").append(rs.getInt("prestamo_id")).append("\n");
+               sb.append("Número Préstamo      : ").append(rs.getString("numero_prestamo")).append("\n");
+               sb.append("Cédula Cliente       : ").append(rs.getString("documento")).append("\n");
+               sb.append("Nombre               : ").append(rs.getString("primer_nombre")).append(" ")
+                     .append(rs.getString("segundo_nombre")).append("\n");
+               sb.append("Apellido             : ").append(rs.getString("primer_apellido")).append(" ")
+                     .append(rs.getString("segundo_apellido")).append("\n");
+               sb.append("Valor Préstamo       : $").append(String.format("%,.2f", valor)).append("\n");
+               sb.append("Valor Total          : $").append(String.format("%,.2f", rs.getDouble("valor_total")))
+                     .append("\n");
+               sb.append("Valor Pendiente      : $").append(String.format("%,.2f", valorPendiente)).append("\n");
+               sb.append("Interés              : ").append(rs.getDouble("interes")).append("%\n");
+               sb.append("Cuotas               : ").append(rs.getInt("cuotas")).append("\n");
+               sb.append("Estado               : ").append(rs.getString("estado")).append("\n");
+               sb.append("Fecha Inicio         : ").append(rs.getDate("fecha_inicio")).append("\n");
+               sb.append("Fecha Límite         : ").append(rs.getDate("fecha_limite")).append("\n");
+               sb.append("───────────────────────────────────────────────────────────────\n\n");
             }
 
             if (!hayResultados) {
                JOptionPane.showMessageDialog(null,
-                     "No se encontraron resultados.");
+                     "No se encontraron préstamos con los criterios de búsqueda.",
+                     "Sin resultados",
+                     JOptionPane.INFORMATION_MESSAGE);
             } else {
-               JOptionPane.showMessageDialog(null, sb.toString());
+               sb.append("\n╔════════════════════════════════════════════════════════════════╗\n");
+               sb.append("║  Total de préstamos encontrados: ").append(contador).append("\n");
+               sb.append("║  Total Valor: $").append(String.format("%,.2f", totalValor)).append("\n");
+               sb.append("║  Total Pendiente: $").append(String.format("%,.2f", totalPendiente)).append("\n");
+               sb.append("╚════════════════════════════════════════════════════════════════╝\n");
+
+               JOptionPane.showMessageDialog(null,
+                     sb.toString(),
+                     "Resultados de búsqueda",
+                     JOptionPane.INFORMATION_MESSAGE);
             }
          },
                ps -> {
-                  Integer id = null;
                   try {
-                     id = Integer.parseInt(filtro);
-                  } catch (NumberFormatException e) {
-                     // Si no es número, id quedará null
+                     Integer id = null;
+                     try {
+                        id = Integer.parseInt(filtro);
+                     } catch (NumberFormatException e) {
+                        // Si no es número, id quedará null
+                     }
+
+                     ps.setInt(1, id != null ? id : -1);
+                     ps.setInt(2, id != null ? id : -1);
+                     ps.setString(3, filtro);
+                     ps.setString(4, "%" + filtro + "%");
+                     ps.setString(5, "%" + filtro + "%");
+                  } catch (SQLException e) {
+                     e.printStackTrace();
                   }
-                  ps.setInt(1, id != null ? id : -1);
-                  ps.setInt(2, id != null ? id : -1);
-                  ps.setString(3, filtro);
                });
 
       } catch (SQLException e) {
          JOptionPane.showMessageDialog(null,
-               "Error al buscar clientes: " + e.getMessage());
+               "Error al buscar préstamos: " + e.getMessage(),
+               "Error",
+               JOptionPane.ERROR_MESSAGE);
          e.printStackTrace();
       }
    }
-
-
 
    private void seleccionar(String sql,
          ResultSetConsumer rsConsumer,
@@ -437,5 +499,3 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
    }
 
 }
-
-

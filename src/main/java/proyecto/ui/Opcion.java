@@ -290,7 +290,8 @@ public class Opcion {
             crudPrestamo.buscarPrestamosAprobadosPorEmpleado(empleadoId);
             break;
          case 3:
-            JOptionPane.showMessageDialog(null, "Cambiar estado del préstamo");
+            crudPago.VerNumeroPrestamo(prestamo, datos.CedulaUsuario());
+            crudPago.GenerarCuotas(prestamo, datos.NumeroPrestamo());
             break;
       }
    }
@@ -303,10 +304,10 @@ public class Opcion {
             crudPago.Guardar(pago, sqlInsertPago);
             break;
          case 2:
-            crudPago.Buscar("jhlj");
+            crudPago.Buscar("");
             break;
          case 3:
-            crudPago.BuscarActivos("hgfdkjfd");
+            crudPago.BuscarActivos("");
             JOptionPane.showMessageDialog(null, "Ver saldo pendiente");
             break;
       }
@@ -326,7 +327,8 @@ public class Opcion {
             crudPrestamo.Buscar("mora");
             break;
          case 4:
-            reportes.notificacionPersonalizada(notificacion, "INSERT");
+            String sqlInsertNotificacion = "INSERT INTO notificacion (fk_usuario, fk_empleado, nombre, mensaje) VALUES (?, ?, ?, ?)";
+            reportes.notificacionPersonalizada(notificacion, sqlInsertNotificacion);
             break;
          case 5:
             reportes.BuscarPrestamosReporte("");

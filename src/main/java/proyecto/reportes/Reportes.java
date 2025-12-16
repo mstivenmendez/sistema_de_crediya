@@ -74,44 +74,61 @@ public class Reportes {
       }
    }
 
-
    public int notificacionPersonalizada(Notificacion entity, String sql) {
-      int resultado = conexion.ejecutar(sql, ps -> {
-         try {
-
-            String cedula = validar.ValidarDocumento(insertar.Cedula());
-            if (usuario.ValidarCedula(cedula)) {
-               int id = usuario.validarCedulaYObtener(cedula);
-               entity.setFk_usuario(id);
-               ps.setInt(1, entity.getFk_usuario());
-               String cedulaEmpleado = validar.ValidarDocumento(insertar.Cedula());
-               if (usuario.ValidarCedula(cedulaEmpleado)) {
-
-                  int idEmpleado = usuario.validarCedulaYObtener(cedulaEmpleado);
-                  entity.setFk_empleado(idEmpleado);
-                  entity.setNombre(insertar.Motivo());
-                  entity.setMensaje(insertar.Mensaje());
-
-                  ps.setInt(1, entity.getFk_usuario());
-                  ps.setInt(2, entity.getFk_empleado());
-                  ps.setString(3, entity.getNombre());
-                  ps.setString(4, entity.getMensaje());
-               }
-            }
-
-         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Ocurrio un fallo en el registro");
-            throw new RuntimeException(e);
+      try {
+         // 1) Destinatario
+         String cedulaDest = validar.ValidarDocumento(insertar.Cedula());
+         if (!usuario.ValidarCedula(cedulaDest)) {
+            JOptionPane.showMessageDialog(null, "La cédula destinatario '" + cedulaDest + "' no está registrada.",
+                  "Cédula no encontrada", JOptionPane.WARNING_MESSAGE);
+            return 0;
          }
-      });
+         int idDest = usuario.validarCedulaYObtener(cedulaDest);
+         entity.setFk_usuario(idDest);
 
-      if (resultado > 0) {
-         JOptionPane.showMessageDialog(null, "La notificacion fue enviada ");
+         // 2) Remitente (empleado)
+         String cedulaEmpl = validar.ValidarDocumento(insertar.Cedula());
+         if (!usuario.ValidarCedula(cedulaEmpl)) {
+            JOptionPane.showMessageDialog(null, "La cédula remitente '" + cedulaEmpl + "' no está registrada.",
+                  "Cédula no encontrada", JOptionPane.WARNING_MESSAGE);
+            return 0;
+         }
+         int idEmpl = usuario.validarCedulaYObtener(cedulaEmpl);
+         entity.setFk_empleado(idEmpl);
+
+         // 3) Asunto y mensaje
+         entity.setNombre(insertar.Motivo());
+         entity.setMensaje(insertar.Mensaje());
+
+         // 4) Ejecutar insert con parámetros ya validados
+         int resultado = conexion.ejecutar(sql, ps -> {
+            try {
+               ps.setInt(1, entity.getFk_usuario());
+               ps.setInt(2, entity.getFk_empleado());
+               ps.setString(3, entity.getNombre());
+               ps.setString(4, entity.getMensaje());
+            } catch (SQLException e) {
+               throw new RuntimeException(e);
+            }
+         });
+
+         if (resultado > 0) {
+            JOptionPane.showMessageDialog(null, "La notificación fue enviada.");
+         } else {
+            JOptionPane.showMessageDialog(null, "No se pudo enviar la notificación.", "Error",
+                  JOptionPane.ERROR_MESSAGE);
+         }
+         return resultado;
+
+      } catch (Exception e) {
+         JOptionPane.showMessageDialog(null, "Ocurrió un fallo al procesar la notificación: " + e.getMessage(), "Error",
+               JOptionPane.ERROR_MESSAGE);
+         e.printStackTrace();
+         return 0;
       }
-      return resultado;
    }
 
-     // Método auxiliar que debe estar implementado en la clase
+   // Método auxiliar que debe estar implementado en la clase
    private void seleccionar(String sql,
          ResultSetConsumer rsConsumer,
          PreparedStatementConsumer psConsumer) throws SQLException {
