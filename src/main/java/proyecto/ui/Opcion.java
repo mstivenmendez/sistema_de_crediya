@@ -280,8 +280,6 @@ public class Opcion {
          case 1:
             crudPrestamo.Guardar(prestamo,
                   "INSERT INTO prestamo (cliente_usuario_id_fk, empleado_usuario_id_fk, valor, interes, cuotas ) VALUES(?, ?, ?, ?, ?)");
-            String ingrese = datos.NumeroPrestamo();
-            crudPago.GenerarCuotas(prestamo, ingrese);
             break;
          case 2:
             // Listar todos los préstamos que ha aprobado este empleado
@@ -289,8 +287,8 @@ public class Opcion {
             crudPrestamo.buscarPrestamosAprobadosPorEmpleado(empleadoId);
             break;
          case 3:
-            crudPago.VerNumeroPrestamo(prestamo, datos.CedulaUsuario());
-            crudPago.GenerarCuotas(prestamo, datos.NumeroPrestamo());
+            String ingreso = datos.NumeroPrestamo();
+            crudPago.GenerarCuotas(ingreso);
             break;
       }
    }
@@ -321,7 +319,7 @@ public class Opcion {
             crudPago.BuscarInactivos("");
             break;
          case 3:
-            crudPrestamo.Buscar("mora");
+            crudPago.BuscarEstado("mora");
             break;
          case 4:
             String sqlInsertNotificacion = "INSERT INTO notificacion (fk_usuario, fk_empleado, nombre, mensaje) VALUES (?, ?, ?, ?)";
