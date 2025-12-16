@@ -16,6 +16,7 @@ import proyecto.prestamo.CrudPrestamo;
 import proyecto.prestamo.Prestamo;
 import proyecto.solicitud.Datos;
 import proyecto.util.IngresoDatos;
+import proyecto.util.SesionUsuario;
 import proyecto.validaciones.Validacion;
 import proyecto.validaciones.ValidacionUsuario;
 import proyecto.validaciones.ValidarNumero;
@@ -79,7 +80,7 @@ public class CrudPago implements CrudEntity<Pago> {
          }
 
          // 4. Solicitar el valor del pago
-         double valorPago = numero.solicitarDouble(insertar.valorCuotas(), 1000000000);
+         double valorPago = numero.solicitarDouble(insertar.PagarCuota(), 1000000000);
 
          if (valorPago <= 0) {
             JOptionPane.showMessageDialog(null,
@@ -107,9 +108,8 @@ public class CrudPago implements CrudEntity<Pago> {
          // 7. Ejecutar INSERT con prestamo_id_fk y valor
          int resultado = conexion.ejecutar(sql, ps -> {
             try {
-               ps.setInt(1, entity.getPrestamoIdFk()); // ✅ Parámetro 1: prestamo_id_fk
-               ps.setDouble(2, entity.getValor()); // ✅ Parámetro 2: valor
-               ps.setString(3, "pagado"); // ✅ Parámetro 3: estado
+               ps.setInt(1, entity.getPrestamoIdFk()); 
+               ps.setDouble(2, entity.getValor()); 
 
             } catch (SQLException e) {
                JOptionPane.showMessageDialog(null,
@@ -172,7 +172,6 @@ public class CrudPago implements CrudEntity<Pago> {
             SELECT
                p.pago_id,
                p.valor,
-               p.estado,
                p.fecha_pago,
                pr.prestamo_id,
                pr.valor AS valor_prestamo,
@@ -218,7 +217,6 @@ public class CrudPago implements CrudEntity<Pago> {
                sb.append("Valor Pagado         : $").append(String.format("%,.2f", valor)).append("\n");
                sb.append("Valor Préstamo       : $").append(String.format("%,.2f", rs.getDouble("valor_prestamo")))
                      .append("\n");
-               sb.append("Estado del Pago      : ").append(rs.getString("estado")).append("\n");
                sb.append("Fecha de Pago        : ").append(rs.getDate("fecha_pago")).append("\n");
                sb.append("───────────────────────────────────────────────────────────────\n\n");
             }
@@ -459,6 +457,92 @@ public class CrudPago implements CrudEntity<Pago> {
       } catch (SQLException e) {
          JOptionPane.showMessageDialog(null,
                "Error al buscar préstamos inactivos: " + e.getMessage(),
+               "Error",
+               JOptionPane.ERROR_MESSAGE);
+         e.printStackTrace();
+      }
+   }
+
+   public void BuscarMisPagos() {
+      int usuarioId = SesionUsuario.getUsuarioId();
+      
+      String sql = """
+            SELECT
+               p.pago_id,
+               p.valor,
+               p.fecha_pago,
+               pr.prestamo_id,
+               pr.numero_prestamo,
+               pr.valor AS valor_prestamo,
+               i.documento,
+               i.primer_nombre,
+               i.segundo_nombre,
+               i.primer_apellido,
+               i.segundo_apellido
+            FROM pago p
+            INNER JOIN prestamo pr ON p.prestamo_id_fk = pr.prestamo_id
+            INNER JOIN informacion i ON pr.cliente_usuario_id_fk = i.usuario_id_fk
+            WHERE pr.cliente_usuario_id_fk = ?
+            ORDER BY p.fecha_pago DESC
+            """;
+
+      try {
+         seleccionar(sql, rs -> {
+            StringBuilder sb = new StringBuilder();
+            boolean hayResultados = false;
+            int contador = 0;
+            double totalPagos = 0;
+
+            sb.append("╔════════════════════════════════════════════════════════════════╗\n");
+            sb.append("║                      MIS PAGOS REALIZADOS                      ║\n");
+            sb.append("╚════════════════════════════════════════════════════════════════╝\n\n");
+
+            // Procesar todos los resultados
+            while (rs.next()) {
+               hayResultados = true;
+               contador++;
+               double valor = rs.getDouble("valor");
+               totalPagos += valor;
+
+               sb.append("───────────────────────────────────────────────────────────────\n");
+               sb.append("Pago # ").append(contador).append("\n");
+               sb.append("───────────────────────────────────────────────────────────────\n");
+               sb.append("ID Pago              : ").append(rs.getInt("pago_id")).append("\n");
+               sb.append("Número Préstamo      : ").append(rs.getString("numero_prestamo")).append("\n");
+               sb.append("ID Préstamo          : ").append(rs.getInt("prestamo_id")).append("\n");
+               sb.append("Valor Pagado         : $").append(String.format("%,.2f", valor)).append("\n");
+               sb.append("Valor Préstamo       : $").append(String.format("%,.2f", rs.getDouble("valor_prestamo")))
+                     .append("\n");
+               sb.append("Fecha de Pago        : ").append(rs.getDate("fecha_pago")).append("\n");
+               sb.append("───────────────────────────────────────────────────────────────\n\n");
+            }
+
+            if (!hayResultados) {
+               JOptionPane.showMessageDialog(null,
+                     "No has realizado pagos en el sistema.",
+                     "Sin pagos",
+                     JOptionPane.INFORMATION_MESSAGE);
+            } else {
+               sb.append("\n╔════════════════════════════════════════════════════════════════╗\n");
+               sb.append("║  Total de pagos realizados: ").append(contador).append("\n");
+               sb.append("║  Total Pagado: $").append(String.format("%,.2f", totalPagos)).append("\n");
+               sb.append("╚════════════════════════════════════════════════════════════════╝\n");
+
+               // Generar archivo
+               generarPlan(sb.toString(), "misPagos.txt");
+            }
+         },
+               ps -> {
+                  try {
+                     ps.setInt(1, usuarioId);
+                  } catch (SQLException e) {
+                     throw new RuntimeException(e);
+                  }
+               });
+
+      } catch (SQLException e) {
+         JOptionPane.showMessageDialog(null,
+               "Error al buscar tus pagos: " + e.getMessage(),
                "Error",
                JOptionPane.ERROR_MESSAGE);
          e.printStackTrace();

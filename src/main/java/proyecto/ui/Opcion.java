@@ -110,10 +110,11 @@ public class Opcion {
                   crudPrestamo.buscarMisPrestamos();
                   break;
                case 3:
-                  JOptionPane.showMessageDialog(null, "N mis pagos");
+                  crudPago.BuscarMisPagos();
                   break;
                case 4:
-                  JOptionPane.showMessageDialog(null, "Realizar un pago");
+                  String sqlInsertPago = "INSERT INTO pago (prestamo_id_fk, valor, fecha_pago) VALUES (?, ?, NOW())";
+                  crudPago.Guardar(pago, sqlInsertPago);
                   break;
                case 5:
                   simulacion.ejecutarSimulacion();
@@ -298,7 +299,7 @@ public class Opcion {
    public void VistaGestionPagosOpcion(int valor) {
       switch (valor) {
          case 1:
-            String sqlInsertPago = "INSERT INTO pago (prestamo_id_fk, valor, estado, fecha_pago) VALUES (?, ?, ?, NOW())";
+            String sqlInsertPago = "INSERT INTO pago (prestamo_id_fk, valor, fecha_pago) VALUES (?, ?, NOW())";
             crudPago.Guardar(pago, sqlInsertPago);
             break;
          case 2:
