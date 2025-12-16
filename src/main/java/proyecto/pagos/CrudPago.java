@@ -110,7 +110,7 @@ public class CrudPago implements CrudEntity<Pago> {
             try {
                ps.setInt(1, entity.getPrestamoIdFk());
                ps.setDouble(2, entity.getValor());
-               
+
 
             } catch (SQLException e) {
                JOptionPane.showMessageDialog(null,
@@ -169,93 +169,113 @@ public class CrudPago implements CrudEntity<Pago> {
 
    @Override
    public void Buscar(String dato) {
-      String sql = """
-            SELECT
-               p.pago_id,
-               p.valor,
-               p.fecha_pago,
-               pr.prestamo_id,
-               pr.valor AS valor_prestamo,
-               i.documento,
-               i.primer_nombre,
-               i.segundo_nombre,
-               i.primer_apellido,
-               i.segundo_apellido
-            FROM pago p
-            INNER JOIN prestamo pr ON p.prestamo_id_fk = pr.prestamo_id
-            INNER JOIN informacion i ON pr.cliente_usuario_id_fk = i.usuario_id_fk
-            ORDER BY p.fecha_pago DESC
-            """;
+   String sql = """
+         SELECT
+            pr.prestamo_id,
+            pr.numero_prestamo,
+            pr.valor,
+            pr.valor_total,
+            pr.interes,
+            pr.cuotas,
+            pr.estado,
+            pr.fecha_inicio,
+            pr.fecha_limite,
+            pr.valor_pendiente,
+            i.documento,
+            i.primer_nombre,
+            i.segundo_nombre,
+            i.primer_apellido,
+            i.segundo_apellido
+         FROM prestamo pr
+         INNER JOIN informacion i ON pr.cliente_usuario_id_fk = i.usuario_id_fk
+         WHERE pr.estado = ?
+         ORDER BY pr.fecha_inicio DESC
+         """;
 
-      try {
-         seleccionar(sql, rs -> {
-            StringBuilder sb = new StringBuilder();
-            boolean hayResultados = false;
-            int contador = 0;
-            double totalPagos = 0;
+   try {
+      seleccionar(sql, rs -> {
+         StringBuilder sb = new StringBuilder();
+         boolean hayResultados = false;
+         int contador = 0;
+         double totalPrestamos = 0;
+         double totalPendiente = 0;
 
-            sb.append("╔════════════════════════════════════════════════════════════════╗\n");
-            sb.append("║                    REPORTE DE TODOS LOS PAGOS                  ║\n");
-            sb.append("╚════════════════════════════════════════════════════════════════╝\n\n");
+         sb.append("╔════════════════════════════════════════════════════════════════╗\n");
+         sb.append("║             REPORTE DE PRÉSTAMOS: ").append(dato.toUpperCase()).append("\n");
+         sb.append("╚════════════════════════════════════════════════════════════════╝\n\n");
 
-            // Procesar todos los resultados
-            while (rs.next()) {
-               hayResultados = true;
-               contador++;
-               double valor = rs.getDouble("valor");
-               totalPagos += valor;
+         // Procesar todos los resultados
+         while (rs.next()) {
+            hayResultados = true;
+            contador++;
+            double valor = rs.getDouble("valor");
+            double valorPendiente = rs.getDouble("valor_pendiente");
+            totalPrestamos += valor;
+            totalPendiente += valorPendiente;
 
-               sb.append("───────────────────────────────────────────────────────────────\n");
-               sb.append("Pago # ").append(contador).append("\n");
-               sb.append("───────────────────────────────────────────────────────────────\n");
-               sb.append("Cédula Cliente        : ").append(rs.getString("documento")).append("\n");
-               sb.append("Nombre               : ").append(rs.getString("primer_nombre")).append(" ")
-                     .append(rs.getString("segundo_nombre")).append("\n");
-               sb.append("Apellido             : ").append(rs.getString("primer_apellido")).append(" ")
-                     .append(rs.getString("segundo_apellido")).append("\n");
-               sb.append("ID Pago              : ").append(rs.getInt("pago_id")).append("\n");
-               sb.append("Número del Préstamo  : ").append(rs.getInt("prestamo_id")).append("\n");
-               sb.append("Valor Pagado         : $").append(String.format("%,.2f", valor)).append("\n");
-               sb.append("Valor Préstamo       : $").append(String.format("%,.2f", rs.getDouble("valor_prestamo")))
-                     .append("\n");
-               sb.append("Fecha de Pago        : ").append(rs.getDate("fecha_pago")).append("\n");
-               sb.append("───────────────────────────────────────────────────────────────\n\n");
-            }
+            sb.append("───────────────────────────────────────────────────────────────\n");
+            sb.append("Préstamo # ").append(contador).append("\n");
+            sb.append("───────────────────────────────────────────────────────────────\n");
+            sb.append("Cédula Cliente        : ").append(rs.getString("documento")).append("\n");
+            sb.append("Nombre               : ").append(rs.getString("primer_nombre")).append(" ")
+                  .append(rs.getString("segundo_nombre")).append("\n");
+            sb.append("Apellido             : ").append(rs.getString("primer_apellido")).append(" ")
+                  .append(rs.getString("segundo_apellido")).append("\n");
+            sb.append("ID Préstamo          : ").append(rs.getInt("prestamo_id")).append("\n");
+            sb.append("Número Préstamo      : ").append(rs.getString("numero_prestamo")).append("\n");
+            sb.append("Valor Préstamo       : $").append(String.format("%,.2f", valor)).append("\n");
+            sb.append("Valor Total          : $").append(String.format("%,.2f", rs.getDouble("valor_total")))
+                  .append("\n");
+            sb.append("Interés              : ").append(rs.getDouble("interes")).append("%\n");
+            sb.append("Cuotas               : ").append(rs.getInt("cuotas")).append("\n");
+            sb.append("Valor Pendiente      : $").append(String.format("%,.2f", valorPendiente)).append("\n");
+            sb.append("Estado               : ").append(rs.getString("estado")).append("\n");
+            sb.append("Fecha Inicio         : ").append(rs.getDate("fecha_inicio")).append("\n");
+            sb.append("Fecha Límite         : ").append(rs.getDate("fecha_limite")).append("\n");
+            sb.append("───────────────────────────────────────────────────────────────\n\n");
+         }
 
-            if (!hayResultados) {
-               JOptionPane.showMessageDialog(null,
-                     "No se encontraron pagos registrados.",
-                     "Sin resultados",
-                     JOptionPane.INFORMATION_MESSAGE);
-            } else {
-               sb.append("\n╔════════════════════════════════════════════════════════════════╗\n");
-               sb.append("║  Total de pagos encontrados: ").append(contador).append("\n");
-               sb.append("║  Total Pagado: $").append(String.format("%,.2f", totalPagos)).append("\n");
-               sb.append("╚════════════════════════════════════════════════════════════════╝\n");
+         if (!hayResultados) {
+            JOptionPane.showMessageDialog(null,
+                  "No se encontraron préstamos con estado: " + dato,
+                  "Sin resultados",
+                  JOptionPane.INFORMATION_MESSAGE);
+         } else {
+            sb.append("\n╔════════════════════════════════════════════════════════════════╗\n");
+            sb.append("║  Total de préstamos ").append(dato).append(": ").append(contador).append("\n");
+            sb.append("║  Total Préstamos: $").append(String.format("%,.2f", totalPrestamos)).append("\n");
+            sb.append("║  Total Pendiente: $").append(String.format("%,.2f", totalPendiente)).append("\n");
+            sb.append("╚════════════════════════════════════════════════════════════════╝\n");
 
-               // Generar archivo
-               generarPlan(sb.toString());
+            // Generar archivo
+            String nombreArchivo = "reporte_prestamos_" + dato + ".txt";
+            generarPlan(sb.toString(), nombreArchivo);
 
-               JOptionPane.showMessageDialog(null,
-                     "✓ Se encontraron " + contador + " pagos.\n\n" +
-                           "Total pagado: $" + String.format("%,.2f", totalPagos) + "\n" +
-                           "Archivo generado: Plan de Pagos.txt",
-                     "Búsqueda exitosa",
-                     JOptionPane.INFORMATION_MESSAGE);
-            }
-         },
-               ps -> {
-                  // Sin parámetros, trae todos los pagos
-               });
+            JOptionPane.showMessageDialog(null,
+                  "✓ Se encontraron " + contador + " préstamos con estado: " + dato + ".\n\n" +
+                        "Total préstamos: $" + String.format("%,.2f", totalPrestamos) + "\n" +
+                        "Total pendiente: $" + String.format("%,.2f", totalPendiente) + "\n" +
+                        "Archivo generado: " + nombreArchivo,
+                  "Búsqueda exitosa",
+                  JOptionPane.INFORMATION_MESSAGE);
+         }
+      },
+            ps -> {
+               try {
+                  ps.setString(1, dato);
+               } catch (SQLException e) {
+                  throw new RuntimeException(e);
+               }
+            });
 
-      } catch (SQLException e) {
-         JOptionPane.showMessageDialog(null,
-               "Error al buscar pagos: " + e.getMessage(),
-               "Error",
-               JOptionPane.ERROR_MESSAGE);
-         e.printStackTrace();
-      }
+   } catch (SQLException e) {
+      JOptionPane.showMessageDialog(null,
+            "Error al buscar préstamos: " + e.getMessage(),
+            "Error",
+            JOptionPane.ERROR_MESSAGE);
+      e.printStackTrace();
    }
+}
 
    public void BuscarActivos(String dato) {
       String sql = """

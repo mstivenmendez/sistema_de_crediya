@@ -320,7 +320,7 @@ public class Opcion {
             crudPago.BuscarInactivos("");
             break;
          case 3:
-            crudPago.BuscarEstado("mora");
+            crudPago.Buscar("mora");
             break;
          case 4:
             String sqlInsertNotificacion = "INSERT INTO notificacion (fk_usuario, fk_empleado, nombre, mensaje) VALUES (?, ?, ?, ?)";
