@@ -299,7 +299,7 @@ public class Opcion {
    public void VistaGestionPagosOpcion(int valor) {
       switch (valor) {
          case 1:
-            crudPago.Guardar(pago, "INSERT INTO pago (prestamo_id_fk, valor, estado, fecha_pago) VALUES (?, ?, ?, NOW())");
+            crudPago.Guardar(pago, "INSERT INTO pago (prestamo_id_fk, numero_prestamo, valor, estado) VALUES (?, ?, ?, ?)");
             break;
          case 2:
             crudPago.Buscar("");
@@ -314,12 +314,10 @@ public class Opcion {
    public void VistaGestionReportesOpcion(int valor) {
       switch (valor) {
          case 1:
-            crudPrestamo.Buscar("activo");
+            crudPago.BuscarActivos("");
             break;
          case 2:
-            // Generar reporte de préstamos aprobados por este empleado
-            int empleadoId = SesionUsuario.getUsuarioId();
-            crudPrestamo.buscarPrestamosAprobadosPorEmpleado(empleadoId);
+            crudPago.BuscarInactivos("");
             break;
          case 3:
             crudPrestamo.Buscar("mora");

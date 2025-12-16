@@ -168,7 +168,7 @@ public int Guardar(Pago entity, String sql) {
                i.segundo_apellido
             FROM pago p
             INNER JOIN prestamo pr ON p.prestamo_id_fk = pr.prestamo_id
-            INNER JOIN informacion i ON pr.usuario_id_fk = i.usuario_id_fk
+            INNER JOIN informacion i ON pr.cliente_usuario_id_fk = i.usuario_id_fk
             ORDER BY p.fecha_pago DESC
             """;
 
@@ -247,6 +247,7 @@ public int Guardar(Pago entity, String sql) {
       String sql = """
             SELECT
                pr.prestamo_id,
+               pr.numero_prestamo,
                pr.valor,
                pr.valor_total,
                pr.interes,
@@ -254,19 +255,15 @@ public int Guardar(Pago entity, String sql) {
                pr.estado,
                pr.fecha_inicio,
                pr.fecha_limite,
+               pr.valor_pendiente,
                i.documento,
                i.primer_nombre,
                i.segundo_nombre,
                i.primer_apellido,
-               i.segundo_apellido,
-               (pr.valor - COALESCE(SUM(p.valor), 0)) AS valor_pendiente
+               i.segundo_apellido
             FROM prestamo pr
-            INNER JOIN informacion i ON pr.usuario_id_fk = i.usuario_id_fk
-            LEFT JOIN pago p ON pr.prestamo_id = p.prestamo_id_fk
+            INNER JOIN informacion i ON pr.cliente_usuario_id_fk = i.usuario_id_fk
             WHERE pr.estado = 'activo'
-            GROUP BY pr.prestamo_id, pr.valor, pr.valor_total, pr.interes, pr.cuotas,
-                     pr.estado, pr.fecha_inicio, pr.fecha_limite, i.documento,
-                     i.primer_nombre, i.segundo_nombre, i.primer_apellido, i.segundo_apellido
             ORDER BY pr.fecha_inicio DESC
             """;
 
@@ -325,13 +322,13 @@ public int Guardar(Pago entity, String sql) {
                sb.append("╚════════════════════════════════════════════════════════════════╝\n");
 
                // Generar archivo
-               generarPlan(sb.toString());
+               generarPlan(sb.toString(), "reportePrestamosActivos.txt");
 
                JOptionPane.showMessageDialog(null,
                      "✓ Se encontraron " + contador + " préstamos activos.\n\n" +
                            "Total préstamos: $" + String.format("%,.2f", totalPrestamos) + "\n" +
                            "Total pendiente: $" + String.format("%,.2f", totalPendiente) + "\n" +
-                           "Archivo generado: Plan de Pagos.txt",
+                           "Archivo generado: reportePrestamosActivos.txt",
                      "Búsqueda exitosa",
                      JOptionPane.INFORMATION_MESSAGE);
             }
@@ -343,6 +340,110 @@ public int Guardar(Pago entity, String sql) {
       } catch (SQLException e) {
          JOptionPane.showMessageDialog(null,
                "Error al buscar préstamos activos: " + e.getMessage(),
+               "Error",
+               JOptionPane.ERROR_MESSAGE);
+         e.printStackTrace();
+      }
+   }
+
+   public void BuscarInactivos(String dato) {
+      String sql = """
+            SELECT
+               pr.prestamo_id,
+               pr.numero_prestamo,
+               pr.valor,
+               pr.valor_total,
+               pr.interes,
+               pr.cuotas,
+               pr.estado,
+               pr.fecha_inicio,
+               pr.fecha_limite,
+               pr.valor_pendiente,
+               i.documento,
+               i.primer_nombre,
+               i.segundo_nombre,
+               i.primer_apellido,
+               i.segundo_apellido
+            FROM prestamo pr
+            INNER JOIN informacion i ON pr.cliente_usuario_id_fk = i.usuario_id_fk
+            WHERE pr.estado = 'inactivo'
+            ORDER BY pr.fecha_inicio DESC
+            """;
+
+      try {
+         seleccionar(sql, rs -> {
+            StringBuilder sb = new StringBuilder();
+            boolean hayResultados = false;
+            int contador = 0;
+            double totalPrestamos = 0;
+            double totalPendiente = 0;
+
+            sb.append("╔════════════════════════════════════════════════════════════════╗\n");
+            sb.append("║             REPORTE DE PRÉSTAMOS INACTIVOS                     ║\n");
+            sb.append("╚════════════════════════════════════════════════════════════════╝\n\n");
+
+            // Procesar todos los resultados
+            while (rs.next()) {
+               hayResultados = true;
+               contador++;
+               double valor = rs.getDouble("valor");
+               double valorPendiente = rs.getDouble("valor_pendiente");
+               totalPrestamos += valor;
+               totalPendiente += valorPendiente;
+
+               sb.append("───────────────────────────────────────────────────────────────\n");
+               sb.append("Préstamo # ").append(contador).append("\n");
+               sb.append("───────────────────────────────────────────────────────────────\n");
+               sb.append("Cédula Cliente        : ").append(rs.getString("documento")).append("\n");
+               sb.append("Nombre               : ").append(rs.getString("primer_nombre")).append(" ")
+                     .append(rs.getString("segundo_nombre")).append("\n");
+               sb.append("Apellido             : ").append(rs.getString("primer_apellido")).append(" ")
+                     .append(rs.getString("segundo_apellido")).append("\n");
+               sb.append("ID Préstamo          : ").append(rs.getInt("prestamo_id")).append("\n");
+               sb.append("Número Préstamo      : ").append(rs.getString("numero_prestamo")).append("\n");
+               sb.append("Valor Préstamo       : $").append(String.format("%,.2f", valor)).append("\n");
+               sb.append("Valor Total          : $").append(String.format("%,.2f", rs.getDouble("valor_total")))
+                     .append("\n");
+               sb.append("Interés              : ").append(rs.getDouble("interes")).append("%\n");
+               sb.append("Cuotas               : ").append(rs.getInt("cuotas")).append("\n");
+               sb.append("Valor Pendiente      : $").append(String.format("%,.2f", valorPendiente)).append("\n");
+               sb.append("Estado               : ").append(rs.getString("estado")).append("\n");
+               sb.append("Fecha Inicio         : ").append(rs.getDate("fecha_inicio")).append("\n");
+               sb.append("Fecha Límite         : ").append(rs.getDate("fecha_limite")).append("\n");
+               sb.append("───────────────────────────────────────────────────────────────\n\n");
+            }
+
+            if (!hayResultados) {
+               JOptionPane.showMessageDialog(null,
+                     "No se encontraron préstamos inactivos.",
+                     "Sin resultados",
+                     JOptionPane.INFORMATION_MESSAGE);
+            } else {
+               sb.append("\n╔════════════════════════════════════════════════════════════════╗\n");
+               sb.append("║  Total de préstamos inactivos: ").append(contador).append("\n");
+               sb.append("║  Total Préstamos: $").append(String.format("%,.2f", totalPrestamos)).append("\n");
+               sb.append("║  Total Pendiente: $").append(String.format("%,.2f", totalPendiente)).append("\n");
+               sb.append("╚════════════════════════════════════════════════════════════════╝\n");
+
+               // Generar archivo
+               generarPlan(sb.toString(), "reportePrestamosInactivos.txt");
+
+               JOptionPane.showMessageDialog(null,
+                     "✓ Se encontraron " + contador + " préstamos inactivos.\n\n" +
+                           "Total préstamos: $" + String.format("%,.2f", totalPrestamos) + "\n" +
+                           "Total pendiente: $" + String.format("%,.2f", totalPendiente) + "\n" +
+                           "Archivo generado: reportePrestamosInactivos.txt",
+                     "Búsqueda exitosa",
+                     JOptionPane.INFORMATION_MESSAGE);
+            }
+         },
+               ps -> {
+                  // Sin parámetros, trae todos los préstamos inactivos
+               });
+
+      } catch (SQLException e) {
+         JOptionPane.showMessageDialog(null,
+               "Error al buscar préstamos inactivos: " + e.getMessage(),
                "Error",
                JOptionPane.ERROR_MESSAGE);
          e.printStackTrace();
@@ -518,8 +619,21 @@ public int Guardar(Pago entity, String sql) {
    private void seleccionar(String sql,
          ResultSetConsumer rsConsumer,
          PreparedStatementConsumer psConsumer) throws SQLException {
-      // Implementación del método que ejecuta la consulta
-      // y llama a los consumers apropiados
+      conexion.seleccionar(sql, 
+         rs -> {
+            try {
+               rsConsumer.accept(rs);
+            } catch (SQLException e) {
+               throw new RuntimeException(e);
+            }
+         },
+         ps -> {
+            try {
+               psConsumer.accept(ps);
+            } catch (SQLException e) {
+               throw new RuntimeException(e);
+            }
+         });
    }
 
    // Interfaces funcionales para los lambdas
