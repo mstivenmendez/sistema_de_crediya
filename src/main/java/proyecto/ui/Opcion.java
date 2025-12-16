@@ -166,7 +166,7 @@ public class Opcion {
             // Bucle para gestión de préstamos
             boolean continuarPrestamos = true;
             while (continuarPrestamos) {
-               Integer opcion = numero.solicitarEntero(ingreso.VistaGestionPrestamos(), 2);
+               Integer opcion = numero.solicitarEntero(ingreso.VistaGestionPrestamos(), 3);
                if (opcion == null)
                   continue;
                if (opcion == 0) {
@@ -299,9 +299,7 @@ public class Opcion {
    public void VistaGestionPagosOpcion(int valor) {
       switch (valor) {
          case 1:
-            Pago pago = new Pago();
-            String sqlInsertPago = "INSERT INTO pago (valor) VALUES (?)";
-            crudPago.Guardar(pago, sqlInsertPago);
+            crudPago.Guardar(pago, "INSERT INTO pago (prestamo_id_fk, valor, estado, fecha_pago) VALUES (?, ?, ?, NOW())");
             break;
          case 2:
             crudPago.Buscar("");

@@ -32,100 +32,112 @@ public class CrudPago implements CrudEntity<Pago> {
    ValidacionUsuario usuario = new ValidacionUsuario();
    CrudPrestamo crudPrestamo = new CrudPrestamo();
 
-   @Override
-   public int Guardar(Pago entity, String sql) {
-      try {
-         // 1. Solicitar y validar cédula
-         String cedula = validar.ValidarDocumento(insertar.Cedula());
+  @Override
+public int Guardar(Pago entity, String sql) {
+   try {
+      // 1. Solicitar y validar número de préstamo
+      String numeroPrestamo = insertar.NumeroPrestamo();
 
-         if (!usuario.ValidarCedula(cedula)) {
-            JOptionPane.showMessageDialog(null,
-                  "La cédula '" + cedula + "' no está registrada en el sistema.",
-                  "Cédula no encontrada",
-                  JOptionPane.WARNING_MESSAGE);
-            return 0;
+
+      // 2. Validar que el préstamo existe y obtener su ID
+      String sqlValidar = """
+            SELECT prestamo_id, valor_pendiente
+            FROM prestamo
+            WHERE numero_prestamo = ?
+            """;
+
+      final int[] prestamoId = { 0 };
+      final double[] valorPendiente = { 0 };
+
+      seleccionar(sqlValidar, rs -> {
+         if (rs.next()) {
+            prestamoId[0] = rs.getInt("prestamo_id");
+            valorPendiente[0] = rs.getDouble("valor_pendiente");
          }
-
-         // 2. Obtener ID del usuario por cédula
-         Integer idUsuario = usuario.validarCedulaYObtener(cedula);
-         if (idUsuario == null) {
-            JOptionPane.showMessageDialog(null,
-                  "No se pudo obtener el ID del usuario.",
-                  "Error",
-                  JOptionPane.ERROR_MESSAGE);
-            return 0;
+      }, ps -> {
+         try {
+            ps.setString(1, numeroPrestamo);
+         } catch (SQLException e) {
+            throw new RuntimeException(e);
          }
+      });
 
-         // 3. Obtener ID del préstamo del usuario
-         Integer idPrestamo = usuario.ObtenerIdPrestamo(idUsuario);
-         if (idPrestamo == null) {
-            JOptionPane.showMessageDialog(null,
-                  "El usuario no tiene préstamos registrados.",
-                  "Préstamo no encontrado",
-                  JOptionPane.WARNING_MESSAGE);
-            return 0;
-         }
-
-         // 4. Validar que el préstamo exista en la base de datos
-         if (!usuario.validarNumeroPrestamoExiste(idPrestamo)) {
-            JOptionPane.showMessageDialog(null,
-                  "El préstamo no existe o está inactivo.",
-                  "Préstamo inválido",
-                  JOptionPane.WARNING_MESSAGE);
-            return 0;
-         }
-
-         // 5. Solicitar el valor del pago
-         double valorPago = numero.solicitarDouble(insertar.valorCuotas(), 1000000000);
-
-         if (valorPago <= 0) {
-            JOptionPane.showMessageDialog(null,
-                  "El valor del pago debe ser mayor a 0.",
-                  "Valor inválido",
-                  JOptionPane.WARNING_MESSAGE);
-            return 0;
-         }
-
-         // 6. Establecer el valor en la entidad
-         entity.setValor(valorPago);
-
-         // 7. Ejecutar INSERT (solo el valor)
-         int resultado = conexion.ejecutar(sql, ps -> {
-            try {
-               ps.setDouble(1, entity.getValor());
-            } catch (SQLException e) {
-               JOptionPane.showMessageDialog(null,
-                     "Error al configurar parámetros: " + e.getMessage(),
-                     "Error",
-                     JOptionPane.ERROR_MESSAGE);
-               throw new RuntimeException(e);
-            }
-         });
-
-         if (resultado > 0) {
-            JOptionPane.showMessageDialog(null,
-                  "✓ Pago registrado exitosamente.\n\n" +
-                        "Valor: $" + String.format("%,.2f", entity.getValor()),
-                  "Éxito",
-                  JOptionPane.INFORMATION_MESSAGE);
-         } else {
-            JOptionPane.showMessageDialog(null,
-                  "No se pudo registrar el pago.",
-                  "Error",
-                  JOptionPane.ERROR_MESSAGE);
-         }
-
-         return resultado;
-
-      } catch (Exception e) {
+      // 3. Si no existe el préstamo, salir del método
+      if (prestamoId[0] == 0) {
          JOptionPane.showMessageDialog(null,
-               "Error durante el registro de pago: " + e.getMessage(),
-               "Error",
-               JOptionPane.ERROR_MESSAGE);
-         e.printStackTrace();
+               "No existe préstamo con número: " + numeroPrestamo,
+               "Préstamo no encontrado",
+               JOptionPane.WARNING_MESSAGE);
          return 0;
       }
+
+      // 4. Solicitar el valor del pago
+      double valorPago = numero.solicitarDouble(insertar.valorCuotas(), 1000000000);
+
+
+      // 5. Validar que no exceda el saldo pendiente
+      if (valorPago > valorPendiente[0]) {
+         JOptionPane.showMessageDialog(null,
+               "El valor ingresado ($" + String.format("%,.2f", valorPago) +
+               ") excede el saldo pendiente ($" + String.format("%,.2f", valorPendiente[0]) + ")",
+               "Valor excedido",
+               JOptionPane.WARNING_MESSAGE);
+         return 0;
+      }
+
+      // 6. Establecer los valores en la entidad (usando setters de Pago)
+      entity.setPrestamoIdFk(prestamoId[0]);
+      entity.setValor(valorPago);
+      entity.setFechaPago(LocalDateTime.now());
+
+      // 7. Ejecutar INSERT con prestamo_id_fk y valor
+      int resultado = conexion.ejecutar(sql, ps -> {
+         try {
+            ps.setInt(1, entity.getPrestamoIdFk());
+            ps.setDouble(2, entity.getValor());
+            ps.setString(3, "pagado");
+         } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null,
+                  "Error al configurar parámetros: " + e.getMessage(),
+                  "Error",
+                  JOptionPane.ERROR_MESSAGE);
+            throw new RuntimeException(e);
+         }
+      });
+
+      if (resultado > 0) {
+         JOptionPane.showMessageDialog(null,
+               "✓ Pago registrado exitosamente.\n\n" +
+               "Número Préstamo: " + numeroPrestamo + "\n" +
+               "ID Préstamo: " + prestamoId[0] + "\n" +
+               "Valor: $" + String.format("%,.2f", entity.getValor()),
+               "Éxito",
+               JOptionPane.INFORMATION_MESSAGE);
+      } else {
+         JOptionPane.showMessageDialog(null,
+               "No se pudo registrar el pago.",
+               "Error",
+               JOptionPane.ERROR_MESSAGE);
+      }
+
+      return resultado;
+
+   } catch (SQLException e) {
+      JOptionPane.showMessageDialog(null,
+            "Error durante el registro de pago: " + e.getMessage(),
+            "Error",
+            JOptionPane.ERROR_MESSAGE);
+      e.printStackTrace();
+      return 0;
+   } catch (Exception e) {
+      JOptionPane.showMessageDialog(null,
+            "Error durante el registro de pago: " + e.getMessage(),
+            "Error",
+            JOptionPane.ERROR_MESSAGE);
+      e.printStackTrace();
+      return 0;
    }
+}
 
    @Override
    public int Elimnar(Pago entity, String dato, String id) {
