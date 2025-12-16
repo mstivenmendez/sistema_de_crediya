@@ -1,7 +1,12 @@
--- Vista que combina datos de usuario con información personal
--- Ejecutar esto en tu base de datos
-CREATE VIEW vista_usuarios_datos AS
-SELECT u.usuario_id,
+-- -----------------------------------------------------
+-- View `crediya_db`.`vista_usuarios_datos`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `crediya_db`.`vista_usuarios_datos`;
+USE `crediya_db`;
+CREATE OR REPLACE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER 
+VIEW `crediya_db`.`vista_usuarios_datos` AS 
+SELECT 
+   u.usuario_id,
    u.correo,
    u.clave,
    u.estado,
@@ -17,6 +22,7 @@ SELECT u.usuario_id,
    i.salario,
    i.fecha_nacimiento
 FROM usuario u
-   INNER JOIN informacion i ON u.usuario_id = i.usuario_id_fk;
+INNER JOIN informacion i ON u.usuario_id = i.usuario_id_fk;
+
 -- Verificar que la vista fue creada correctamente
 -- SELECT * FROM vista_usuarios_datos;

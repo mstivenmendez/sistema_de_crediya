@@ -1,0 +1,9 @@
+=== MIS NOTIFICACIONES ===
+
+Notificación #1
+Asunto: pagos
+Mensaje: pagienadvadv
+Fecha: 2025-12-16 00:37:22
+Estado: pendiente
+De: Carlos Pérez
+---------------------------

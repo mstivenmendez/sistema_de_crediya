@@ -120,7 +120,7 @@ public class Opcion {
                   simulacion.ejecutarSimulacion();
                   break;
                case 6:
-                  JOptionPane.showMessageDialog(null, "Reportes (notificaciones)");
+                  reportes.buscarMisNotificaciones();
                   break;
             }
             // Pedir siguiente opción
