@@ -184,77 +184,94 @@ public class ClienteCrud implements CrudEntity<Cliente> {
    }
 
    @Override
-   public int Actualizar(Cliente entity, String id, String dato) {
-      return conexion.ejecutar(dato, ps -> {
-         try {
-            int index = 1;
+public int Actualizar(Cliente entity, String id, String dato) {
+   String sql = """
+         UPDATE informacion
+         SET %s
+         WHERE documento = ?
+         """.formatted(dato);
 
-            if (dato.contains("primer_nombre = ?")) {
-               entity.setNombre(validar.ValidarTexto(insertar.Nombre()));
-               ps.setString(index++, entity.getNombre());
-            }
-            if (dato.contains("segundo_nombre = ?")) {
-               entity.setNombre2(validar.ValidarOpcional(insertar.Nombre2()));
-               ps.setString(index++, entity.getNombre2());
-            }
-            if (dato.contains("primer_apellido = ?")) {
-               entity.setApellido(validar.ValidarTexto(insertar.Apellido()));
-               ps.setString(index++, entity.getApellido());
-            }
-            if (dato.contains("segundo_apellido = ?")) {
-               entity.setApellido2(validar.ValidarOpcional(insertar.Apellido2()));
-               ps.setString(index++, entity.getApellido2());
-            }
-            if (dato.contains("telefono = ?")) {
-               entity.setTelefono(validar.ValidarTelefonoU(insertar.Telefono()));
-               ps.setString(index++, entity.getTelefono());
-            }
+   return conexion.ejecutar(sql, ps -> {
+      try {
+         int index = 1;
 
-            // El ID va como último parámetro del WHERE
-            ps.setString(index, id);
-
-         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "ERROR EN LA ACTUALIZACION");
+         if (dato.contains("primer_nombre = ?")) {
+            entity.setNombre(validar.ValidarTexto(insertar.Nombre()));
+            ps.setString(index++, entity.getNombre());
          }
-      });
-   }
+         if (dato.contains("segundo_nombre = ?")) {
+            entity.setNombre2(validar.ValidarOpcional(insertar.Nombre2()));
+            ps.setString(index++, entity.getNombre2());
+         }
+         if (dato.contains("primer_apellido = ?")) {
+            entity.setApellido(validar.ValidarTexto(insertar.Apellido()));
+            ps.setString(index++, entity.getApellido());
+         }
+         if (dato.contains("segundo_apellido = ?")) {
+            entity.setApellido2(validar.ValidarOpcional(insertar.Apellido2()));
+            ps.setString(index++, entity.getApellido2());
+         }
+         if (dato.contains("telefono = ?")) {
+            entity.setTelefono(validar.ValidarTelefonoU(insertar.Telefono()));
+            ps.setString(index++, entity.getTelefono());
+         }
+
+         // ✅ FALTABA: Establecer el parámetro del WHERE (documento)
+         ps.setString(index, id);
+
+      } catch (SQLException e) {
+         JOptionPane.showMessageDialog(null,
+               "Error al configurar parámetros: " + e.getMessage(),
+               "Error",
+               JOptionPane.ERROR_MESSAGE);
+         throw new RuntimeException(e);
+      }
+   });
+}
 
    public int ActualizarUsuario(Cliente entity, String id, String dato) {
-      return conexion.ejecutar(dato, ps -> {
-         try {
-            int index = 1;
+   String sql = """
+         UPDATE usuario
+         SET %s
+         WHERE usuario_id = ?
+         """.formatted(dato);
 
-            if (dato.contains("correo = ?")) {
-               entity.setCorreo(validar.ValidarEmail(insertar.Correo()));
-               ps.setString(index++, entity.getCorreo());
-            }
-            if (dato.contains("clave = ?")) {
-               entity.setContraseña(validar.ValidarClave(insertar.Password()));
-               ps.setString(index++, entity.getContraseña());
-            }
-            if (dato.contains("nombre_usuario = ?")) {
-               entity.setUsuario(validar.ValidarUsuarioU(insertar.Usuario()));
-               ps.setString(index++, entity.getUsuario());
-            }
-            try {
-               ps.setString(index, dato);
-            } catch (SQLException e) {
-               throw new RuntimeException(e);
-            }
+   return conexion.ejecutar(sql, ps -> {
+      try {
+         int index = 1;
 
-         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "ERROR EN LA ACTUALIZACION");
+         if (dato.contains("correo = ?")) {
+            entity.setCorreo(validar.ValidarEmail(insertar.Correo()));
+            ps.setString(index++, entity.getCorreo());
+         }
+         if (dato.contains("clave = ?")) {
+            entity.setContraseña(validar.ValidarClave(insertar.Password()));
+            ps.setString(index++, entity.getContraseña());
+         }
+         if (dato.contains("nombre_usuario = ?")) {
+            entity.setUsuario(validar.ValidarUsuarioU(insertar.Usuario()));
+            ps.setString(index++, entity.getUsuario());
          }
 
-      });
-   }
+         // ✅ FALTABA: Establecer el parámetro del WHERE (usuario_id)
+         ps.setString(index, id);
+
+      } catch (SQLException e) {
+         JOptionPane.showMessageDialog(null,
+               "Error al configurar parámetros: " + e.getMessage(),
+               "Error",
+               JOptionPane.ERROR_MESSAGE);
+         throw new RuntimeException(e);
+      }
+   });
+}
 
    /**
     * Genera un reporte .txt con todos los clientes registrados
     */
    public void generarReporteClientes() {
       String sql = "SELECT * FROM vista_usuarios_datos WHERE rol = 'cliente' ORDER BY usuario_id";
-      
+
       conexion.seleccionar(sql,
             rs -> {
                try {
@@ -262,14 +279,14 @@ public class ClienteCrud implements CrudEntity<Cliente> {
                   sb.append("═══════════════════════════════════════════════════\n");
                   sb.append("           REPORTE DE CLIENTES\n");
                   sb.append("═══════════════════════════════════════════════════\n\n");
-                  
+
                   boolean hayResultados = false;
                   int contador = 0;
-                  
+
                   while (rs.next()) {
                      hayResultados = true;
                      contador++;
-                     
+
                      sb.append("╔════════════════════════════════════════════════╗\n");
                      sb.append("║  CLIENTE #").append(contador).append("\n");
                      sb.append("╠════════════════════════════════════════════════╣\n");
@@ -285,7 +302,7 @@ public class ClienteCrud implements CrudEntity<Cliente> {
                      sb.append("  Estado          : ").append(rs.getString("estado")).append("\n");
                      sb.append("╚════════════════════════════════════════════════╝\n\n");
                   }
-                  
+
                   if (!hayResultados) {
                      JOptionPane.showMessageDialog(null,
                            "No hay clientes registrados.",
@@ -296,7 +313,7 @@ public class ClienteCrud implements CrudEntity<Cliente> {
                      sb.append("═══════════════════════════════════════════════════\n");
                      sb.append("Total de Clientes: ").append(contador).append("\n");
                      sb.append("═══════════════════════════════════════════════════");
-                     
+
                      // Generar archivo .txt
                      generarArchivoClientes(sb.toString());
                      JOptionPane.showMessageDialog(null,
@@ -316,7 +333,7 @@ public class ClienteCrud implements CrudEntity<Cliente> {
                // Sin parámetros
             });
    }
-   
+
    /**
     * Genera un archivo .txt con el reporte de clientes
     */
@@ -324,11 +341,11 @@ public class ClienteCrud implements CrudEntity<Cliente> {
       try {
          String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
          String nombreArchivo = "ReporteClientes_" + timestamp + ".txt";
-         
+
          try (FileWriter writer = new FileWriter(nombreArchivo)) {
             writer.write(contenido);
          }
-         
+
          System.out.println("Archivo generado: " + nombreArchivo);
       } catch (IOException e) {
          e.printStackTrace();

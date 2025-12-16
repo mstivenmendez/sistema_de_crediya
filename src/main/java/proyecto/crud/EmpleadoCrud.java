@@ -259,47 +259,50 @@ public class EmpleadoCrud implements CrudEntity<Empleado> {
    }
 
    @Override
-   public int Actualizar(Empleado entity, String id, String campo) {
+public int Actualizar(Empleado entity, String id, String campo) {
 
-      String sql = """
-            UPDATE informacion
-            SET %s
-            WHERE documento = ?
-            """.formatted(campo);
+   String sql = """
+         UPDATE informacion
+         SET %s
+         WHERE documento = ?
+         """.formatted(campo);
 
-      return conexion.ejecutar(sql, ps -> {
-         try {
-            int index = 1;
+   return conexion.ejecutar(sql, ps -> {
+      try {
+         int index = 1;
 
-            if (campo.contains("primer_nombre")) {
-               entity.setNombre(validar.ValidarTexto(insertar.Nombre()));
-               ps.setString(index++, entity.getNombre());
-            } else if (campo.contains("segundo_nombre")) {
-               entity.setNombre2(validar.ValidarTexto(insertar.Nombre2()));
-               ps.setString(index++, entity.getNombre2());
-            } else if (campo.contains("primer_apellido")) {
-               entity.setApellido(validar.ValidarTexto(insertar.Apellido()));
-               ps.setString(index++, entity.getApellido());
-            } else if (campo.contains("segundo_apellido")) {
-               entity.setApellido2(validar.ValidarOpcional(insertar.Apellido2()));
-               ps.setString(index++, entity.getApellido2());
-            } else if (campo.contains("telefono")) {
-               entity.setTelefono(validar.ValidarTelefonoU(insertar.Telefono()));
-               ps.setString(index++, entity.getTelefono());
-            } else if (campo.contains("salario")) {
-               entity.setSueldo(
-                     validarNumero.solicitarDouble(insertar.valorSalario(), 50000000));
-               ps.setDouble(index++, entity.getSueldo());
-            }
-
-            ps.setString(index, id);
-
-         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "ERROR EN LA ACTUALIZACION");
+         if (campo.contains("primer_nombre = ?")) {
+            entity.setNombre(validar.ValidarTexto(insertar.Nombre()));
+            ps.setString(index++, entity.getNombre());
+         } else if (campo.contains("segundo_nombre = ?")) {
+            entity.setNombre2(validar.ValidarTexto(insertar.Nombre2()));
+            ps.setString(index++, entity.getNombre2());
+         } else if (campo.contains("primer_apellido = ?")) {
+            entity.setApellido(validar.ValidarTexto(insertar.Apellido()));
+            ps.setString(index++, entity.getApellido());
+         } else if (campo.contains("segundo_apellido = ?")) {
+            entity.setApellido2(validar.ValidarOpcional(insertar.Apellido2()));
+            ps.setString(index++, entity.getApellido2());
+         } else if (campo.contains("telefono = ?")) {
+            entity.setTelefono(validar.ValidarTelefonoU(insertar.Telefono()));
+            ps.setString(index++, entity.getTelefono());
+         } else if (campo.contains("salario = ?")) {
+            entity.setSueldo(validarNumero.solicitarDouble(insertar.valorSalario(), 50000000));
+            ps.setDouble(index++, entity.getSueldo());
          }
 
-      });
-   }
+         // ✅ FALTABA: Establecer el parámetro del WHERE (documento)
+         ps.setString(index, id);
+
+      } catch (SQLException e) {
+         JOptionPane.showMessageDialog(null,
+               "Error al configurar parámetros: " + e.getMessage(),
+               "Error",
+               JOptionPane.ERROR_MESSAGE);
+         throw new RuntimeException(e);
+      }
+   });
+}
 
    // Método auxiliar que debe estar implementado en la clase
    private void seleccionar(String sql,
