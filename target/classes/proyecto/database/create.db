@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `crediya_db`.`usuario` (
   `rol` ENUM('empleado', 'cliente') NOT NULL DEFAULT 'cliente',
   PRIMARY KEY (`usuario_id`))
 ENGINE = InnoDB
-AUTO_INCREMENT = 10
+AUTO_INCREMENT = 20
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -39,7 +39,7 @@ COLLATE = utf8mb4_0900_ai_ci;
 -- Table `crediya_db`.`informacion`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `crediya_db`.`informacion` (
-  `usuario_id_fk` INT NOT NULL AUTO_INCREMENT,
+  `usuario_id_fk` INT NOT NULL,
   `primer_nombre` VARCHAR(45) NOT NULL,
   `segundo_nombre` VARCHAR(45) NULL DEFAULT NULL,
   `primer_apellido` VARCHAR(45) NOT NULL,
@@ -54,7 +54,6 @@ CREATE TABLE IF NOT EXISTS `crediya_db`.`informacion` (
     FOREIGN KEY (`usuario_id_fk`)
     REFERENCES `crediya_db`.`usuario` (`usuario_id`))
 ENGINE = InnoDB
-AUTO_INCREMENT = 7
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -63,19 +62,23 @@ COLLATE = utf8mb4_0900_ai_ci;
 -- Table `crediya_db`.`prestamo`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `crediya_db`.`prestamo` (
-  `prestamo_id` INT NOT NULL,
+  `prestamo_id` INT NOT NULL AUTO_INCREMENT,
   `cliente_usuario_id_fk` INT NOT NULL,
   `empleado_usuario_id_fk` INT NOT NULL,
   `valor` DECIMAL(12,2) NOT NULL,
-  `valor_total` DECIMAL(15,2) NULL,
-  `valor_pendiente` DECIMAL(15,2) NULL,
+  `valor_total` DECIMAL(15,2) NULL DEFAULT NULL,
+  `valor_pendiente` DECIMAL(15,2) NULL DEFAULT NULL,
   `interes` DECIMAL(10,2) NOT NULL,
   `cuotas` INT NOT NULL,
-  `fecha_inicio` DATETIME NOT NULL,
+  `valor_cuota` DECIMAL(15,2) NOT NULL,
+  `cuota_pendiente` INT NULL DEFAULT NULL,
+  `fecha_inicio` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `fecha_limite` DATETIME NOT NULL,
-  `estado` ENUM('activo', 'inactivo') NOT NULL,
+  `estado` ENUM('activo', 'inactivo') NOT NULL DEFAULT 'activo',
+  `numero_prestamo` VARCHAR(20) NOT NULL,
   PRIMARY KEY (`prestamo_id`),
   UNIQUE INDEX `prestamo_id_UNIQUE` (`prestamo_id` ASC) VISIBLE,
+  UNIQUE INDEX `numero_prestamo` (`numero_prestamo` ASC) VISIBLE,
   INDEX `fk_prestamo_usuario1_idx` (`empleado_usuario_id_fk` ASC) VISIBLE,
   INDEX `fk_prestamo_usuario2_idx` (`cliente_usuario_id_fk` ASC) VISIBLE,
   CONSTRAINT `fk_prestamo_usuario1`
@@ -85,6 +88,7 @@ CREATE TABLE IF NOT EXISTS `crediya_db`.`prestamo` (
     FOREIGN KEY (`cliente_usuario_id_fk`)
     REFERENCES `crediya_db`.`usuario` (`usuario_id`))
 ENGINE = InnoDB
+AUTO_INCREMENT = 7
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -93,10 +97,11 @@ COLLATE = utf8mb4_0900_ai_ci;
 -- Table `crediya_db`.`pago`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `crediya_db`.`pago` (
-  `pago_id` INT NOT NULL,
+  `pago_id` INT NOT NULL AUTO_INCREMENT,
   `prestamo_id_fk` INT NOT NULL,
   `valor` DECIMAL(12,2) NOT NULL,
   `fecha_pago` DATETIME NULL DEFAULT NULL,
+  `numero_pago` VARCHAR(25) NULL DEFAULT NULL,
   `estado` ENUM('pendiente', 'pagado', 'vencido') NOT NULL,
   PRIMARY KEY (`pago_id`),
   INDEX `fk_pago_prestamo1_idx` (`prestamo_id_fk` ASC) VISIBLE,
@@ -106,8 +111,3 @@ CREATE TABLE IF NOT EXISTS `crediya_db`.`pago` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
-
-
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

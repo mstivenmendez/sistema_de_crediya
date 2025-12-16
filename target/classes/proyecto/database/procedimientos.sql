@@ -6,6 +6,7 @@ CREATE PROCEDURE sp_prestamos_por_cliente (
 BEGIN
     SELECT 
         prestamo_id,
+        numero_prestamo,
         valor,
         valor_total,
         valor_pendiente,
@@ -32,6 +33,7 @@ CREATE PROCEDURE sp_prestamos_por_empleado(
 BEGIN
     SELECT 
         p.prestamo_id,
+        p.numero_prestamo,
         p.valor,
         p.valor_total,
         p.valor_pendiente,
@@ -40,7 +42,6 @@ BEGIN
         p.fecha_inicio,
         p.fecha_limite,
         p.estado,
-
         i.primer_nombre,
         i.segundo_nombre,
         i.primer_apellido,

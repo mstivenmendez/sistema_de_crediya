@@ -31,6 +31,16 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
       buscarPrestamosPorUsuarioId(usuarioId);
    }
 
+   /**
+    * Busca préstamos de un cliente específico por su usuario_id
+    * Permite que administradores vean los préstamos de cualquier cliente
+    * 
+    * @param usuarioId ID del usuario/cliente
+    */
+   public void buscarPrestamosDeCliente(int usuarioId) {
+      buscarPrestamosPorUsuarioId(usuarioId);
+   }
+
    public void buscarEmpleado(){
       int idEmpleado = SesionUsuario.getUsuarioId();
       buscarPrestamosAprobadosPorEmpleado(idEmpleado);
@@ -52,6 +62,7 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
                   entity.setEmpleadoUsuarioId(idEmpleado);
                   entity.setValor(numero.solicitarDouble(insertar.valorPrestamo(), 1000000000));
                   entity.setCuotas(numero.solicitarEntero(insertar.valorCuotas(), 240));
+                  entity.setInteres(numero.solicitarDouble(insertar.valorInteres(), 20)); // Interés fijo del 12.5%
 
                   ps.setInt(1, entity.getClienteUsuarioId());
                   ps.setInt(2, entity.getEmpleadoUsuarioId());
@@ -148,6 +159,7 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
                      sb.append("║  PRÉSTAMO #").append(contador).append("\n");
                      sb.append("╠════════════════════════════════════════════════╣\n");
                      sb.append("  ID Préstamo      : ").append(rs.getInt("prestamo_id")).append("\n");
+                     sb.append("  Número Préstamo  : ").append(rs.getString("numero_prestamo")).append("\n");
                      sb.append("  Valor Préstamo   : $").append(String.format("%,.2f", valor)).append("\n");
                      sb.append("  Valor Total      : $").append(String.format("%,.2f", valorTotal)).append("\n");
                      sb.append("  Valor Pendiente  : $").append(String.format("%,.2f", valorPendiente)).append("\n");
@@ -241,6 +253,7 @@ public class CrudPrestamo implements CrudEntity<Prestamo> {
                      sb.append("║  PRÉSTAMO #").append(contador).append("\n");
                      sb.append("╠════════════════════════════════════════════════╣\n");
                      sb.append("  ID Préstamo      : ").append(rs.getInt("prestamo_id")).append("\n");
+                     sb.append("  Número Préstamo  : ").append(rs.getString("numero_prestamo")).append("\n");
                      sb.append("  Nombre           : ").append(rs.getString("primer_nombre")).append(" ").append(rs.getString("segundo_nombre")).append("\n");
                      sb.append("  apellido         : ").append(rs.getString("primer_apellido")).append(" ").append(rs.getString("segundo_apellido")).append("\n");
                      sb.append("  Documento Cliente: ").append(rs.getString("cliente_documento")).append("\n");

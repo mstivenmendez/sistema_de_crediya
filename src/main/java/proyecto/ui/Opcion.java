@@ -217,8 +217,7 @@ public class Opcion {
                   "INSERT INTO informacion (primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, documento, salario, telefono, fecha_nacimiento, usuario_id_fk) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             break;
          case 2:
-            empleadoCrud.Buscar("empleado");
-            JOptionPane.showMessageDialog(null, "Empleados Alistados");
+            empleadoCrud.generarReporteEmpleados();
             break;
          case 3:
             String cedula3 = validar.ValidarDocumento(datos.Cedula());
@@ -230,7 +229,7 @@ public class Opcion {
          case 4:
             String cedula4 = validar.ValidarDocumento(datos.Cedula());
             if (validacionUsuario.ValidarCedula(cedula4)) {
-               empleadoCrud.Elimnar(empleado, "documento", cedula4);
+               empleadoCrud.Elimnar(empleado, null, cedula4);
             }
             break;
       }
@@ -257,15 +256,20 @@ public class Opcion {
    public void VistaGestionClientesOpcion(int valor) {
       switch (valor) {
          case 1:
-            clienteCrud.Guardar(cliente,
+            id = clienteCrud.Guardar(cliente,
                   "INSERT INTO informacion (primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, documento, telefono, fecha_nacimiento, usuario_id_fk) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             break;
          case 2:
-            clienteCrud.Buscar("cliente");
+            clienteCrud.generarReporteClientes();
+            break;
          case 3:
             String cedula1 = validar.ValidarDocumento(datos.Cedula());
             if (validacionUsuario.ValidarCedula(cedula1)) {
-               crudPrestamo.Buscar(cedula1);
+               // Obtener el usuario_id del cliente por su documento
+               Integer clienteId = validacionUsuario.validarCedulaYObtener(cedula1);
+               if (clienteId != null) {
+                  crudPrestamo.buscarPrestamosDeCliente(clienteId);
+               }
             }
             break;
       }

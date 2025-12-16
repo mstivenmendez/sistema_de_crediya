@@ -4,6 +4,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.io.FileWriter;
+import java.io.IOException;
 import javax.swing.JOptionPane;
 import proyecto.personal.Cliente;
 import proyecto.solicitud.Datos;
@@ -243,6 +247,96 @@ public class ClienteCrud implements CrudEntity<Cliente> {
          }
 
       });
+   }
+
+   /**
+    * Genera un reporte .txt con todos los clientes registrados
+    */
+   public void generarReporteClientes() {
+      String sql = "SELECT * FROM vista_usuarios_datos WHERE rol = 'cliente' ORDER BY usuario_id";
+      
+      conexion.seleccionar(sql,
+            rs -> {
+               try {
+                  StringBuilder sb = new StringBuilder();
+                  sb.append("═══════════════════════════════════════════════════\n");
+                  sb.append("           REPORTE DE CLIENTES\n");
+                  sb.append("═══════════════════════════════════════════════════\n\n");
+                  
+                  boolean hayResultados = false;
+                  int contador = 0;
+                  
+                  while (rs.next()) {
+                     hayResultados = true;
+                     contador++;
+                     
+                     sb.append("╔════════════════════════════════════════════════╗\n");
+                     sb.append("║  CLIENTE #").append(contador).append("\n");
+                     sb.append("╠════════════════════════════════════════════════╣\n");
+                     sb.append("  ID Usuario      : ").append(rs.getInt("usuario_id")).append("\n");
+                     sb.append("  Cédula          : ").append(rs.getString("documento")).append("\n");
+                     sb.append("  Usuario         : ").append(rs.getString("nombre_usuario")).append("\n");
+                     sb.append("  Nombre          : ").append(rs.getString("primer_nombre")).append(" ")
+                           .append(rs.getString("segundo_nombre")).append("\n");
+                     sb.append("  Apellido        : ").append(rs.getString("primer_apellido")).append(" ")
+                           .append(rs.getString("segundo_apellido")).append("\n");
+                     sb.append("  Teléfono        : ").append(rs.getString("telefono")).append("\n");
+                     sb.append("  Correo          : ").append(rs.getString("correo")).append("\n");
+                     sb.append("  Estado          : ").append(rs.getString("estado")).append("\n");
+                     sb.append("╚════════════════════════════════════════════════╝\n\n");
+                  }
+                  
+                  if (!hayResultados) {
+                     JOptionPane.showMessageDialog(null,
+                           "No hay clientes registrados.",
+                           "Sin Resultados",
+                           JOptionPane.INFORMATION_MESSAGE);
+                  } else {
+                     // Resumen
+                     sb.append("═══════════════════════════════════════════════════\n");
+                     sb.append("Total de Clientes: ").append(contador).append("\n");
+                     sb.append("═══════════════════════════════════════════════════");
+                     
+                     // Generar archivo .txt
+                     generarArchivoClientes(sb.toString());
+                     JOptionPane.showMessageDialog(null,
+                           "Reporte generado exitosamente",
+                           "Éxito",
+                           JOptionPane.INFORMATION_MESSAGE);
+                  }
+               } catch (SQLException e) {
+                  e.printStackTrace();
+                  JOptionPane.showMessageDialog(null,
+                        "Error al procesar clientes: " + e.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+               }
+            },
+            ps -> {
+               // Sin parámetros
+            });
+   }
+   
+   /**
+    * Genera un archivo .txt con el reporte de clientes
+    */
+   private void generarArchivoClientes(String contenido) {
+      try {
+         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+         String nombreArchivo = "ReporteClientes_" + timestamp + ".txt";
+         
+         try (FileWriter writer = new FileWriter(nombreArchivo)) {
+            writer.write(contenido);
+         }
+         
+         System.out.println("Archivo generado: " + nombreArchivo);
+      } catch (IOException e) {
+         e.printStackTrace();
+         JOptionPane.showMessageDialog(null,
+               "Error al generar el archivo: " + e.getMessage(),
+               "Error",
+               JOptionPane.ERROR_MESSAGE);
+      }
    }
 
    // Método auxiliar que debe estar implementado en la clase
