@@ -110,7 +110,7 @@ public class Opcion {
                   crudPrestamo.buscarMisPrestamos();
                   break;
                case 3:
-                  JOptionPane.showMessageDialog(null, "Ver mis pagos");
+                  JOptionPane.showMessageDialog(null, "N mis pagos");
                   break;
                case 4:
                   JOptionPane.showMessageDialog(null, "Realizar un pago");
@@ -280,7 +280,6 @@ public class Opcion {
          case 1:
             crudPrestamo.Guardar(prestamo,
                   "INSERT INTO prestamo (cliente_usuario_id_fk, empleado_usuario_id_fk, valor, interes, cuotas ) VALUES(?, ?, ?, ?, ?)");
-            crudPago.VerNumeroPrestamo(prestamo, datos.CedulaUsuario());
             String ingrese = datos.NumeroPrestamo();
             crudPago.GenerarCuotas(prestamo, ingrese);
             break;
@@ -299,14 +298,16 @@ public class Opcion {
    public void VistaGestionPagosOpcion(int valor) {
       switch (valor) {
          case 1:
-            crudPago.Guardar(pago, "INSERT INTO pago (prestamo_id_fk, valor, estado, fecha_pago) VALUES (?, ?, ?, NOW())");
+            String sqlInsertPago = "INSERT INTO pago (prestamo_id_fk, valor, estado, fecha_pago) VALUES (?, ?, ?, NOW())";
+            crudPago.Guardar(pago, sqlInsertPago);
             break;
          case 2:
+            // Buscar todos los pagos
             crudPago.Buscar("");
             break;
          case 3:
+            // Ver préstamos activos con saldo pendiente
             crudPago.BuscarActivos("");
-            JOptionPane.showMessageDialog(null, "Ver saldo pendiente");
             break;
       }
    }
