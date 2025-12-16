@@ -182,7 +182,7 @@ public class Opcion {
             // Bucle para gestión de pagos
             boolean continuarPagos = true;
             while (continuarPagos) {
-               Integer opcion = numero.solicitarEntero(ingreso.VistaGestionPagos(), 3);
+               Integer opcion = numero.solicitarEntero(ingreso.VistaGestionPagos(), 2);
                if (opcion == null)
                   continue;
                if (opcion == 0) {
@@ -197,7 +197,7 @@ public class Opcion {
             // Bucle para gestión de reportes
             boolean continuarReportes = true;
             while (continuarReportes) {
-               Integer opcion = numero.solicitarEntero(ingreso.VistaGestionReportes(), 5);
+               Integer opcion = numero.solicitarEntero(ingreso.VistaGestionReportes(), 4);
                if (opcion == null)
                   continue;
                if (opcion == 0) {
@@ -223,8 +223,9 @@ public class Opcion {
          case 3:
             String cedula3 = validar.ValidarDocumento(datos.Cedula());
             if (validacionUsuario.ValidarCedula(cedula3)) {
-               VistaEmpleadoActualizarOpcion(numero.solicitarEntero(ingreso.VistaEmpleadoActualizar(), 4));
+               // Asignar la cédula antes de invocar el menú de actualización
                Cedula = cedula3;
+               VistaEmpleadoActualizarOpcion(numero.solicitarEntero(ingreso.VistaEmpleadoActualizar(), 4));
             }
             break;
          case 4:
@@ -237,20 +238,38 @@ public class Opcion {
    }
 
    public void VistaEmpleadoActualizarOpcion(int valor) {
+      // Validar que exista una cédula seleccionada antes de actualizar
+      if (Cedula == null || Cedula.isEmpty()) {
+         JOptionPane.showMessageDialog(null,
+               "Primero seleccione un empleado ingresando su cédula.",
+               "Falta selección",
+               JOptionPane.WARNING_MESSAGE);
+         return;
+      }
+
       switch (valor) {
          case 1:
             empleadoCrud.Actualizar(empleado, Cedula, "telefono = ?");
             JOptionPane.showMessageDialog(null, "telefono Actualizado");
             break;
          case 2:
-            clienteCrud.ActualizarUsuario(cliente, Cedula, "correo = ?");
-            JOptionPane.showMessageDialog(null, "correo actualizado");
+            Integer usuarioIdCorreo = validacionUsuario.validarCedulaYObtener(Cedula);
+            if (usuarioIdCorreo != null) {
+               clienteCrud.ActualizarUsuario(cliente, String.valueOf(usuarioIdCorreo), "correo = ?");
+               JOptionPane.showMessageDialog(null, "correo actualizado");
+            }
+            break;
          case 3:
             empleadoCrud.Actualizar(empleado, Cedula, "salario = ?");
             JOptionPane.showMessageDialog(null, "salario Actualizado");
+            break;
          case 4:
-            clienteCrud.ActualizarUsuario(cliente, Cedula, "nombre_usuario = ?");
-            JOptionPane.showMessageDialog(null, "Usuario actualizado Al");
+            Integer usuarioIdUsuario = validacionUsuario.validarCedulaYObtener(Cedula);
+            if (usuarioIdUsuario != null) {
+               clienteCrud.ActualizarUsuario(cliente, String.valueOf(usuarioIdUsuario), "nombre_usuario = ?");
+               JOptionPane.showMessageDialog(null, "Usuario actualizado");
+            }
+            break;
       }
    }
 
@@ -304,20 +323,16 @@ public class Opcion {
             // Buscar todos los pagos
             crudPago.Buscar("");
             break;
-         case 3:
-            // Ver préstamos activos con saldo pendiente
-            crudPago.BuscarActivos("");
-            break;
       }
    }
 
    public void VistaGestionReportesOpcion(int valor) {
       switch (valor) {
          case 1:
-            crudPago.BuscarActivos("");
+            crudPago.Buscar("activo");
             break;
          case 2:
-            crudPago.BuscarInactivos("");
+            crudPago.Buscar("inactivo");
             break;
          case 3:
             crudPago.Buscar("mora");
@@ -326,9 +341,7 @@ public class Opcion {
             String sqlInsertNotificacion = "INSERT INTO notificacion (fk_usuario, fk_empleado, nombre, mensaje) VALUES (?, ?, ?, ?)";
             reportes.notificacionPersonalizada(notificacion, sqlInsertNotificacion);
             break;
-         case 5:
-            reportes.BuscarPrestamosReporte("");
-            break;
+         
       }
    }
 

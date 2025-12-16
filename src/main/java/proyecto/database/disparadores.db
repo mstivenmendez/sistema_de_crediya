@@ -44,3 +44,26 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER trg_pago_after_insert
+AFTER INSERT ON pago
+FOR EACH ROW
+BEGIN
+    -- Actualizar valores del préstamo
+    UPDATE prestamo
+    SET 
+        valor_pendiente = IF(valor_pendiente - NEW.valor < 0, 0, valor_pendiente - NEW.valor),
+        cuota_pendiente = IF(cuota_pendiente > 0, cuota_pendiente - 1, 0),
+        estado = CASE
+            WHEN valor_pendiente - NEW.valor <= 0 THEN 'inactivo'
+            ELSE 'activo'
+        END
+    WHERE prestamo_id = NEW.prestamo_id_fk;
+END$$
+
+DELIMITER ;
+
+INSERT INTO pago (prestamo_id_fk, valor, fecha_pago)
+VALUES (1, 100000, NOW());

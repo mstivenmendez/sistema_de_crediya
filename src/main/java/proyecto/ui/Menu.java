@@ -115,7 +115,6 @@ public class Menu {
                   + " 🏦💰 Gestión de Pagos 💰🏦 \n"
                   + "1. Registrar pago 🧾💵\n"
                   + "2. Consultar historial de pagos 📜\n"
-                  + "3. Ver saldo pendiente 🔍💸\n"
                   + "0. Volver 🔙\n");
       return ingreso;
    }
@@ -129,7 +128,6 @@ public class Menu {
                   + "2. Préstamos vencidos 🔴\n"
                   + "3. Clientes morosos ⚠️\n"
                   + "4. Generar reporte automático (enviar notificaciones) 🔔 \n"
-                  + "5. Historial completo de préstamos 📘\n"
                   + "0. Volver 🔙\n");
       return ingreso;
    }
