@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS `crediya_db`.`notificacion` (
   INDEX `idx_notificacion_fk_usuario` (`fk_usuario` ASC) VISIBLE,
   INDEX `idx_notificacion_fk_empleado` (`fk_empleado` ASC) VISIBLE)
 ENGINE = InnoDB
+AUTO_INCREMENT = 2
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_unicode_ci;
 
