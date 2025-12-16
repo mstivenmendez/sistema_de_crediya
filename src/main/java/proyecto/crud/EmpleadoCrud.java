@@ -155,10 +155,10 @@ public class EmpleadoCrud implements CrudEntity<Empleado> {
                ps.setString(3, entity.getApellido());
                ps.setString(4, entity.getApellido2());
                ps.setString(5, entity.getDocumento());
-               ps.setDouble(6, entity.getSueldo());
-               ps.setString(7, entity.getTelefono());
-               ps.setObject(8, entity.getFechaNacimiento());
-               ps.setInt(9, usuarioId[0]); // ← AQUÍ SE USA EL ID DEL USUARIO // ← AQUÍ SE USA EL ID DEL USUARIO
+               ps.setString(6, entity.getTelefono());
+               ps.setDouble(8, entity.getSueldo());
+               ps.setObject(9, entity.getFechaNacimiento());
+               ps.setInt(10, usuarioId[0]); // ← AQUÍ SE USA EL ID DEL USUARIO
             } catch (SQLException e) {
                throw new RuntimeException("Error al guardar información personal: " + e.getMessage(), e);
             }
@@ -295,100 +295,10 @@ public class EmpleadoCrud implements CrudEntity<Empleado> {
             ps.setString(index, id);
 
          } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "ERROR EN LA ACTUALIZACIÓN: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "ERROR EN LA ACTUALIZACION");
          }
-      });
-   }
 
-   /**
-    * Genera un reporte .txt con todos los empleados registrados
-    */
-   public void generarReporteEmpleados() {
-      String sql = "SELECT * FROM vista_empleados WHERE rol = 'empleado' ORDER BY usuario_id";
-      
-      conexion.seleccionar(sql,
-            rs -> {
-               try {
-                  StringBuilder sb = new StringBuilder();
-                  sb.append("═══════════════════════════════════════════════════\n");
-                  sb.append("           REPORTE DE EMPLEADOS\n");
-                  sb.append("═══════════════════════════════════════════════════\n\n");
-                  
-                  boolean hayResultados = false;
-                  int contador = 0;
-                  
-                  while (rs.next()) {
-                     hayResultados = true;
-                     contador++;
-                     
-                     sb.append("╔════════════════════════════════════════════════╗\n");
-                     sb.append("║  EMPLEADO #").append(contador).append("\n");
-                     sb.append("╠════════════════════════════════════════════════╣\n");
-                     sb.append("  ID Usuario      : ").append(rs.getInt("usuario_id")).append("\n");
-                     sb.append("  Cédula          : ").append(rs.getString("documento")).append("\n");
-                     sb.append("  Usuario         : ").append(rs.getString("nombre_usuario")).append("\n");
-                     sb.append("  Nombre          : ").append(rs.getString("primer_nombre")).append(" ")
-                           .append(rs.getString("segundo_nombre")).append("\n");
-                     sb.append("  Apellido        : ").append(rs.getString("primer_apellido")).append(" ")
-                           .append(rs.getString("segundo_apellido")).append("\n");
-                     sb.append("  Teléfono        : ").append(rs.getString("telefono")).append("\n");
-                     sb.append("  Correo          : ").append(rs.getString("correo")).append("\n");
-                     sb.append("  Estado          : ").append(rs.getString("estado")).append("\n");
-                     sb.append("  Salario         : $").append(String.format("%,.2f", rs.getDouble("salario"))).append("\n");
-                     sb.append("╚════════════════════════════════════════════════╝\n\n");
-                  }
-                  
-                  if (!hayResultados) {
-                     JOptionPane.showMessageDialog(null,
-                           "No hay empleados registrados.",
-                           "Sin Resultados",
-                           JOptionPane.INFORMATION_MESSAGE);
-                  } else {
-                     // Resumen
-                     sb.append("═══════════════════════════════════════════════════\n");
-                     sb.append("Total de Empleados: ").append(contador).append("\n");
-                     sb.append("═══════════════════════════════════════════════════");
-                     
-                     // Generar archivo .txt
-                     generarArchivoEmpleados(sb.toString());
-                     JOptionPane.showMessageDialog(null,
-                           "Reporte generado exitosamente",
-                           "Éxito",
-                           JOptionPane.INFORMATION_MESSAGE);
-                  }
-               } catch (SQLException e) {
-                  e.printStackTrace();
-                  JOptionPane.showMessageDialog(null,
-                        "Error al procesar empleados: " + e.getMessage(),
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
-               }
-            },
-            ps -> {
-               // Sin parámetros
-            });
-   }
-   
-   /**
-    * Genera un archivo .txt con el reporte de empleados
-    */
-   private void generarArchivoEmpleados(String contenido) {
-      try {
-         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
-         String nombreArchivo = "ReporteEmpleados_" + timestamp + ".txt";
-         
-         try (FileWriter writer = new FileWriter(nombreArchivo)) {
-            writer.write(contenido);
-         }
-         
-         System.out.println("Archivo generado: " + nombreArchivo);
-      } catch (IOException e) {
-         e.printStackTrace();
-         JOptionPane.showMessageDialog(null,
-               "Error al generar el archivo: " + e.getMessage(),
-               "Error",
-               JOptionPane.ERROR_MESSAGE);
-      }
+      });
    }
 
    // Método auxiliar que debe estar implementado en la clase

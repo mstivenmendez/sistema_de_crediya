@@ -39,7 +39,6 @@ public class Opcion {
    Reportes reportes = new Reportes();
    Notificacion notificacion = new Notificacion();
 
-
    public void VistaSesionOpcion(int valor) {
       switch (valor) {
          case 1:
@@ -72,7 +71,7 @@ public class Opcion {
          case 2:
             // Bucle para mantener en el menú de administrador
             boolean continuarAdmin = validacionUsuario.ValidacionAdminExistente();
-            while (continuarAdmin ) {
+            while (continuarAdmin) {
                Integer opcionAdmin = numero.solicitarEntero(ingreso.VistaAdministrador(), 5);
                if (opcionAdmin == null)
                   continue;
@@ -104,7 +103,8 @@ public class Opcion {
             switch (valor) {
                case 1:
                   String datosFormateados = usuarioCrud.obtenerDatosFormateados();
-                  JOptionPane.showMessageDialog(null, datosFormateados, "Mi Información", JOptionPane.INFORMATION_MESSAGE);
+                  JOptionPane.showMessageDialog(null, datosFormateados, "Mi Información",
+                        JOptionPane.INFORMATION_MESSAGE);
                   break;
                case 2:
                   crudPrestamo.buscarMisPrestamos();
@@ -298,7 +298,9 @@ public class Opcion {
    public void VistaGestionPagosOpcion(int valor) {
       switch (valor) {
          case 1:
-            crudPago.Guardar(pago, "INSERT INTO N" );
+            Pago pago = new Pago();
+            String sqlInsertPago = "INSERT INTO pago (valor) VALUES (?)";
+            crudPago.Guardar(pago, sqlInsertPago);
             break;
          case 2:
             crudPago.Buscar("jhlj");
@@ -324,13 +326,12 @@ public class Opcion {
             crudPrestamo.Buscar("mora");
             break;
          case 4:
-            reportes.notificacionPersonalizada(notificacion,"INSERT");
+            reportes.notificacionPersonalizada(notificacion, "INSERT");
             break;
          case 5:
             reportes.BuscarPrestamosReporte("");
             break;
       }
    }
-
 
 }

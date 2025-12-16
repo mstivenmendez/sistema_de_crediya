@@ -6,11 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 import javax.swing.JOptionPane;
-
 import proyecto.crud.ClienteCrud;
 import proyecto.crud.CrudEntity;
 import proyecto.personal.Cliente;
@@ -18,7 +14,6 @@ import proyecto.prestamo.CrudPrestamo;
 import proyecto.prestamo.Prestamo;
 import proyecto.solicitud.Datos;
 import proyecto.util.IngresoDatos;
-import proyecto.util.SesionUsuario;
 import proyecto.validaciones.Validacion;
 import proyecto.validaciones.ValidacionUsuario;
 import proyecto.validaciones.ValidarNumero;
@@ -37,29 +32,97 @@ public class CrudPago implements CrudEntity<Pago> {
 
    @Override
    public int Guardar(Pago entity, String sql) {
-      int resultado = conexion.ejecutar(sql, ps -> {
-         try {
-            String cedula = validar.ValidarDocumento(insertar.Cedula());
-            if (usuario.ValidarCedula(cedula)) {
-               int id_usuario = usuario.validarCedulaYObtener(cedula);
-               int id_prestamo = usuario.ObtenerIdPrestamo(id_usuario);
-               entity.setPrestamoIdFk(id_prestamo);
-               entity.setValor(numero.solicitarDouble(insertar.valorCuotas(), 1000000000));
+      try {
+         // 1. Solicitar y validar cédula
+         String cedula = validar.ValidarDocumento(insertar.Cedula());
 
-               ps.setInt(1, entity.getPrestamoIdFk());
-               ps.setDouble(2, entity.getValor());
-            }
-
-         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Ocurrio un fallo en el registro");
-            throw new RuntimeException(e);
+         if (!usuario.ValidarCedula(cedula)) {
+            JOptionPane.showMessageDialog(null,
+                  "La cédula '" + cedula + "' no está registrada en el sistema.",
+                  "Cédula no encontrada",
+                  JOptionPane.WARNING_MESSAGE);
+            return 0;
          }
-      });
 
-      if (resultado > 0) {
-         JOptionPane.showMessageDialog(null, "Guardó el pago ");
+         // 2. Obtener ID del usuario por cédula
+         Integer idUsuario = usuario.validarCedulaYObtener(cedula);
+         if (idUsuario == null) {
+            JOptionPane.showMessageDialog(null,
+                  "No se pudo obtener el ID del usuario.",
+                  "Error",
+                  JOptionPane.ERROR_MESSAGE);
+            return 0;
+         }
+
+         // 3. Obtener ID del préstamo del usuario
+         Integer idPrestamo = usuario.ObtenerIdPrestamo(idUsuario);
+         if (idPrestamo == null) {
+            JOptionPane.showMessageDialog(null,
+                  "El usuario no tiene préstamos registrados.",
+                  "Préstamo no encontrado",
+                  JOptionPane.WARNING_MESSAGE);
+            return 0;
+         }
+
+         // 4. Validar que el préstamo exista en la base de datos
+         if (!usuario.validarNumeroPrestamoExiste(idPrestamo)) {
+            JOptionPane.showMessageDialog(null,
+                  "El préstamo no existe o está inactivo.",
+                  "Préstamo inválido",
+                  JOptionPane.WARNING_MESSAGE);
+            return 0;
+         }
+
+         // 5. Solicitar el valor del pago
+         double valorPago = numero.solicitarDouble(insertar.valorCuotas(), 1000000000);
+
+         if (valorPago <= 0) {
+            JOptionPane.showMessageDialog(null,
+                  "El valor del pago debe ser mayor a 0.",
+                  "Valor inválido",
+                  JOptionPane.WARNING_MESSAGE);
+            return 0;
+         }
+
+         // 6. Establecer el valor en la entidad
+         entity.setValor(valorPago);
+
+         // 7. Ejecutar INSERT (solo el valor)
+         int resultado = conexion.ejecutar(sql, ps -> {
+            try {
+               ps.setDouble(1, entity.getValor());
+            } catch (SQLException e) {
+               JOptionPane.showMessageDialog(null,
+                     "Error al configurar parámetros: " + e.getMessage(),
+                     "Error",
+                     JOptionPane.ERROR_MESSAGE);
+               throw new RuntimeException(e);
+            }
+         });
+
+         if (resultado > 0) {
+            JOptionPane.showMessageDialog(null,
+                  "✓ Pago registrado exitosamente.\n\n" +
+                        "Valor: $" + String.format("%,.2f", entity.getValor()),
+                  "Éxito",
+                  JOptionPane.INFORMATION_MESSAGE);
+         } else {
+            JOptionPane.showMessageDialog(null,
+                  "No se pudo registrar el pago.",
+                  "Error",
+                  JOptionPane.ERROR_MESSAGE);
+         }
+
+         return resultado;
+
+      } catch (Exception e) {
+         JOptionPane.showMessageDialog(null,
+               "Error durante el registro de pago: " + e.getMessage(),
+               "Error",
+               JOptionPane.ERROR_MESSAGE);
+         e.printStackTrace();
+         return 0;
       }
-      return resultado;
    }
 
    @Override
@@ -77,119 +140,189 @@ public class CrudPago implements CrudEntity<Pago> {
    @Override
    public void Buscar(String dato) {
       String sql = """
-            SELECT prestamos
-            FROM *
-            WHERE cliente_id = ?
-               OR cedula = ?
-               OR rol = ?
+            SELECT
+               p.pago_id,
+               p.valor,
+               p.estado,
+               p.fecha_pago,
+               pr.prestamo_id,
+               pr.valor AS valor_prestamo,
+               i.documento,
+               i.primer_nombre,
+               i.segundo_nombre,
+               i.primer_apellido,
+               i.segundo_apellido
+            FROM pago p
+            INNER JOIN prestamo pr ON p.prestamo_id_fk = pr.prestamo_id
+            INNER JOIN informacion i ON pr.usuario_id_fk = i.usuario_id_fk
+            ORDER BY p.fecha_pago DESC
             """;
 
       try {
-
          seleccionar(sql, rs -> {
             StringBuilder sb = new StringBuilder();
             boolean hayResultados = false;
             int contador = 0;
+            double totalPagos = 0;
+
+            sb.append("╔════════════════════════════════════════════════════════════════╗\n");
+            sb.append("║                    REPORTE DE TODOS LOS PAGOS                  ║\n");
+            sb.append("╚════════════════════════════════════════════════════════════════╝\n\n");
 
             // Procesar todos los resultados
             while (rs.next()) {
                hayResultados = true;
                contador++;
-               sb.append("Pagos # ").append(contador).append("\n");
-               sb.append("Cédula: ").append(rs.getString("documento")).append("\n");
-               sb.append("Nombre: ").append(rs.getString("primer_nombre")).append(" ")
+               double valor = rs.getDouble("valor");
+               totalPagos += valor;
+
+               sb.append("───────────────────────────────────────────────────────────────\n");
+               sb.append("Pago # ").append(contador).append("\n");
+               sb.append("───────────────────────────────────────────────────────────────\n");
+               sb.append("Cédula Cliente        : ").append(rs.getString("documento")).append("\n");
+               sb.append("Nombre               : ").append(rs.getString("primer_nombre")).append(" ")
                      .append(rs.getString("segundo_nombre")).append("\n");
-               sb.append("apellido: ").append(rs.getString("primer_apellido")).append(" ")
+               sb.append("Apellido             : ").append(rs.getString("primer_apellido")).append(" ")
                      .append(rs.getString("segundo_apellido")).append("\n");
-               sb.append("Valor: ").append(rs.getString("valor")).append("\n");
-               sb.append("Numero de Pago ").append(rs.getString("numero_pago")).append("\n");
-               sb.append("Numero del Prestamo: ").append(rs.getString("numero_prestamo")).append("\n");
-               sb.append("Fecha pago ").append(rs.getString("fecha_pago")).append("\n");
-               sb.append("Valor Pendiente: ").append(rs.getString("valor_pendiente")).append("\n");
-               sb.append("---------------------------\n");
+               sb.append("ID Pago              : ").append(rs.getInt("pago_id")).append("\n");
+               sb.append("Número del Préstamo  : ").append(rs.getInt("prestamo_id")).append("\n");
+               sb.append("Valor Pagado         : $").append(String.format("%,.2f", valor)).append("\n");
+               sb.append("Valor Préstamo       : $").append(String.format("%,.2f", rs.getDouble("valor_prestamo")))
+                     .append("\n");
+               sb.append("Estado del Pago      : ").append(rs.getString("estado")).append("\n");
+               sb.append("Fecha de Pago        : ").append(rs.getDate("fecha_pago")).append("\n");
+               sb.append("───────────────────────────────────────────────────────────────\n\n");
             }
 
             if (!hayResultados) {
                JOptionPane.showMessageDialog(null,
-                     "No se encontraron resultados.");
+                     "No se encontraron pagos registrados.",
+                     "Sin resultados",
+                     JOptionPane.INFORMATION_MESSAGE);
             } else {
-               JOptionPane.showMessageDialog(null, sb.toString());
+               sb.append("\n╔════════════════════════════════════════════════════════════════╗\n");
+               sb.append("║  Total de pagos encontrados: ").append(contador).append("\n");
+               sb.append("║  Total Pagado: $").append(String.format("%,.2f", totalPagos)).append("\n");
+               sb.append("╚════════════════════════════════════════════════════════════════╝\n");
+
+               // Generar archivo
+               generarPlan(sb.toString());
+
+               JOptionPane.showMessageDialog(null,
+                     "✓ Se encontraron " + contador + " pagos.\n\n" +
+                           "Total pagado: $" + String.format("%,.2f", totalPagos) + "\n" +
+                           "Archivo generado: Plan de Pagos.txt",
+                     "Búsqueda exitosa",
+                     JOptionPane.INFORMATION_MESSAGE);
             }
          },
                ps -> {
-                  Integer id = null;
-                  try {
-                     id = Integer.parseInt(dato);
-                  } catch (NumberFormatException e) {
-                     // Si no es número, id quedará null
-                  }
-                  ps.setInt(1, id != null ? id : -1);
-                  ps.setString(2, dato);
-                  ps.setString(3, dato);
+                  // Sin parámetros, trae todos los pagos
                });
 
       } catch (SQLException e) {
          JOptionPane.showMessageDialog(null,
-               "Error al buscar clientes: " + e.getMessage());
+               "Error al buscar pagos: " + e.getMessage(),
+               "Error",
+               JOptionPane.ERROR_MESSAGE);
          e.printStackTrace();
       }
    }
 
    public void BuscarActivos(String dato) {
       String sql = """
-            SELECT prestamos
-            FROM *
-            WHERE cliente_id = ?
-               OR cedula = ?
-               OR rol = ?
+            SELECT
+               p.pago_id,
+               p.valor,
+               p.estado,
+               p.fecha_pago,
+               pr.prestamo_id,
+               pr.valor AS valor_prestamo,
+               i.documento,
+               i.primer_nombre,
+               i.segundo_nombre,
+               i.primer_apellido,
+               i.segundo_apellido,
+               (pr.valor - COALESCE(SUM(p.valor), 0)) AS valor_pendiente
+            FROM pago p
+            INNER JOIN prestamo pr ON p.prestamo_id_fk = pr.prestamo_id
+            INNER JOIN informacion i ON pr.usuario_id_fk = i.usuario_id_fk
+            WHERE p.estado = 'pendiente'
+            GROUP BY p.pago_id, pr.prestamo_id, pr.valor, i.documento,
+                     i.primer_nombre, i.segundo_nombre, i.primer_apellido,
+                     i.segundo_apellido, p.valor, p.fecha_pago
+            ORDER BY p.fecha_pago DESC
             """;
 
       try {
-
          seleccionar(sql, rs -> {
             StringBuilder sb = new StringBuilder();
             boolean hayResultados = false;
             int contador = 0;
+            double totalPendiente = 0;
+
+            sb.append("╔════════════════════════════════════════════════════════════════╗\n");
+            sb.append("║              REPORTE DE PAGOS PENDIENTES                       ║\n");
+            sb.append("╚════════════════════════════════════════════════════════════════╝\n\n");
 
             // Procesar todos los resultados
             while (rs.next()) {
                hayResultados = true;
                contador++;
-               sb.append("Pagos # ").append(contador).append("\n");
-               sb.append("Cédula: ").append(rs.getString("documento")).append("\n");
-               sb.append("Nombre: ").append(rs.getString("primer_nombre")).append(" ")
+               double valor = rs.getDouble("valor");
+               double valorPendiente = rs.getDouble("valor_pendiente");
+               totalPendiente += valorPendiente;
+
+               sb.append("───────────────────────────────────────────────────────────────\n");
+               sb.append("Pago # ").append(contador).append("\n");
+               sb.append("───────────────────────────────────────────────────────────────\n");
+               sb.append("Cédula Cliente        : ").append(rs.getString("documento")).append("\n");
+               sb.append("Nombre               : ").append(rs.getString("primer_nombre")).append(" ")
                      .append(rs.getString("segundo_nombre")).append("\n");
-               sb.append("apellido: ").append(rs.getString("primer_apellido")).append(" ")
+               sb.append("Apellido             : ").append(rs.getString("primer_apellido")).append(" ")
                      .append(rs.getString("segundo_apellido")).append("\n");
-               sb.append("Valor: ").append(rs.getString("valor")).append("\n");
-               sb.append("Numero del Prestamo: ").append(rs.getString("numero_prestamo")).append("\n");
-               sb.append("Fecha pago ").append(rs.getString("fecha_pago")).append("\n");
-               sb.append("Valor Pendiente: ").append(rs.getString("valor_pendiente")).append("\n");
-               sb.append("---------------------------\n");
+               sb.append("ID Pago              : ").append(rs.getInt("pago_id")).append("\n");
+               sb.append("Número del Préstamo  : ").append(rs.getInt("prestamo_id")).append("\n");
+               sb.append("Valor Pagado         : $").append(String.format("%,.2f", valor)).append("\n");
+               sb.append("Valor Préstamo       : $").append(String.format("%,.2f", rs.getDouble("valor_prestamo")))
+                     .append("\n");
+               sb.append("Valor Pendiente      : $").append(String.format("%,.2f", valorPendiente)).append("\n");
+               sb.append("Estado del Pago      : ").append(rs.getString("estado")).append("\n");
+               sb.append("Fecha de Pago        : ").append(rs.getDate("fecha_pago")).append("\n");
+               sb.append("───────────────────────────────────────────────────────────────\n\n");
             }
 
             if (!hayResultados) {
                JOptionPane.showMessageDialog(null,
-                     "No se encontraron resultados.");
+                     "No se encontraron pagos pendientes.",
+                     "Sin resultados",
+                     JOptionPane.INFORMATION_MESSAGE);
             } else {
-               JOptionPane.showMessageDialog(null, sb.toString());
+               sb.append("\n╔════════════════════════════════════════════════════════════════╗\n");
+               sb.append("║  Total de pagos pendientes: ").append(contador).append("\n");
+               sb.append("║  Total Pendiente: $").append(String.format("%,.2f", totalPendiente)).append("\n");
+               sb.append("╚════════════════════════════════════════════════════════════════╝\n");
+
+               // Generar archivo
+               generarPlan(sb.toString());
+
+               JOptionPane.showMessageDialog(null,
+                     "✓ Se encontraron " + contador + " pagos pendientes.\n\n" +
+                           "Total pendiente: $" + String.format("%,.2f", totalPendiente) + "\n" +
+                           "Archivo generado: Plan de Pagos.txt",
+                     "Búsqueda exitosa",
+                     JOptionPane.INFORMATION_MESSAGE);
             }
          },
                ps -> {
-                  Integer id = null;
-                  try {
-                     id = Integer.parseInt(dato);
-                  } catch (NumberFormatException e) {
-                     // Si no es número, id quedará null
-                  }
-                  ps.setInt(1, id != null ? id : -1);
-                  ps.setString(2, dato);
-                  ps.setString(3, dato);
+                  // Sin parámetros, trae todos los pagos pendientes
                });
 
       } catch (SQLException e) {
          JOptionPane.showMessageDialog(null,
-               "Error al buscar clientes: " + e.getMessage());
+               "Error al buscar pagos pendientes: " + e.getMessage(),
+               "Error",
+               JOptionPane.ERROR_MESSAGE);
          e.printStackTrace();
       }
    }
@@ -294,11 +427,11 @@ public class CrudPago implements CrudEntity<Pago> {
          }
       }, cs -> {
          try {
-                  cs.setString(1, cedula);
-               } catch (SQLException e) {
-                  e.printStackTrace();
-                  throw new RuntimeException("Error al configurar parámetros", e);
-               }
+            cs.setString(1, cedula);
+         } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al configurar parámetros", e);
+         }
       });
    }
 

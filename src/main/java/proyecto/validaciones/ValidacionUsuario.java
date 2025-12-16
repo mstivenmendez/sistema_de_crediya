@@ -515,6 +515,8 @@ public class ValidacionUsuario {
       return existe[0];
    }
 
+
+
    public Integer ObtenerIdPrestamo(int id_usuario) {
       // Consultar desde la vista que tiene usuario_id_fk
       String sql = "SELECT `prestamo_id FROM pestamo WHERE cliente_usuario_id_fk = ?";
@@ -547,6 +549,49 @@ public class ValidacionUsuario {
                JOptionPane.WARNING_MESSAGE);
       }
       return prestamoId[0];
+   }
+
+      /**
+    * Valida si un número de préstamo existe en la base de datos
+    *
+    * @param prestamoId ID del préstamo a validar
+    * @return true si el préstamo existe, false en caso contrario
+    */
+   public boolean validarNumeroPrestamoExiste(int prestamoId) {
+      final boolean[] existe = { false };
+
+      String sql = "SELECT COUNT(*) FROM prestamo WHERE prestamo_id = ?";
+
+      conexion.seleccionar(sql,
+            rs -> {
+               try {
+                  if (rs.next()) {
+                     existe[0] = rs.getInt(1) > 0;
+                  }
+               } catch (Exception e) {
+                  e.printStackTrace();
+                  JOptionPane.showMessageDialog(null,
+                        "Error al validar el préstamo: " + e.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+               }
+            },
+            ps -> {
+               try {
+                  ps.setInt(1, prestamoId);
+               } catch (Exception e) {
+                  e.printStackTrace();
+               }
+            });
+
+      if (!existe[0]) {
+         JOptionPane.showMessageDialog(null,
+               "El préstamo con ID '" + prestamoId + "' no existe en el sistema.",
+               "Préstamo no encontrado",
+               JOptionPane.WARNING_MESSAGE);
+      }
+
+      return existe[0];
    }
 }
 
