@@ -75,58 +75,60 @@ public class Reportes {
    }
 
    public int notificacionPersonalizada(Notificacion entity, String sql) {
-      try {
-         // 1) Destinatario
-         String cedulaDest = validar.ValidarDocumento(insertar.Cedula());
-         if (!usuario.ValidarCedula(cedulaDest)) {
-            JOptionPane.showMessageDialog(null, "La cédula destinatario '" + cedulaDest + "' no está registrada.",
-                  "Cédula no encontrada", JOptionPane.WARNING_MESSAGE);
-            return 0;
-         }
-         int idDest = usuario.validarCedulaYObtener(cedulaDest);
-         entity.setFk_usuario(idDest);
-
-         // 2) Remitente (empleado)
-         String cedulaEmpl = validar.ValidarDocumento(insertar.Cedula());
-         if (!usuario.ValidarCedula(cedulaEmpl)) {
-            JOptionPane.showMessageDialog(null, "La cédula remitente '" + cedulaEmpl + "' no está registrada.",
-                  "Cédula no encontrada", JOptionPane.WARNING_MESSAGE);
-            return 0;
-         }
-         int idEmpl = usuario.validarCedulaYObtener(cedulaEmpl);
-         entity.setFk_empleado(idEmpl);
-
-         // 3) Asunto y mensaje
-         entity.setNombre(insertar.Motivo());
-         entity.setMensaje(insertar.Mensaje());
-
-         // 4) Ejecutar insert con parámetros ya validados
-         int resultado = conexion.ejecutar(sql, ps -> {
-            try {
-               ps.setInt(1, entity.getFk_usuario());
-               ps.setInt(2, entity.getFk_empleado());
-               ps.setString(3, entity.getNombre());
-               ps.setString(4, entity.getMensaje());
-            } catch (SQLException e) {
-               throw new RuntimeException(e);
-            }
-         });
-
-         if (resultado > 0) {
-            JOptionPane.showMessageDialog(null, "La notificación fue enviada.");
-         } else {
-            JOptionPane.showMessageDialog(null, "No se pudo enviar la notificación.", "Error",
-                  JOptionPane.ERROR_MESSAGE);
-         }
-         return resultado;
-
-      } catch (Exception e) {
-         JOptionPane.showMessageDialog(null, "Ocurrió un fallo al procesar la notificación: " + e.getMessage(), "Error",
-               JOptionPane.ERROR_MESSAGE);
-         e.printStackTrace();
+   try {
+      // 1) Destinatario (cliente) - solicitar y validar cédula
+      String cedulaDest = validar.ValidarDocumento(insertar.Cedula());
+      if (!usuario.ValidarCedula(cedulaDest)) {
+         JOptionPane.showMessageDialog(null,
+               "La cédula destinatario '" + cedulaDest + "' no está registrada.",
+               "Cédula no encontrada",
+               JOptionPane.WARNING_MESSAGE);
          return 0;
       }
+      int idDest = usuario.validarCedulaYObtener(cedulaDest);
+      entity.setFk_usuario(idDest);
+
+      // 2) Remitente (empleado) - solicitar y validar cédula
+      String cedulaEmpl = validar.ValidarDocumento(insertar.Cedula());
+      if (!usuario.ValidarCedula(cedulaEmpl)) {
+         JOptionPane.showMessageDialog(null,
+               "La cédula remitente '" + cedulaEmpl + "' no está registrada.",
+               "Cédula no encontrada",
+               JOptionPane.WARNING_MESSAGE);
+         return 0;
+      }
+      int idEmpl = usuario.validarCedulaYObtener(cedulaEmpl);
+      entity.setFk_empleado(idEmpl);
+
+      // 3) Asunto y mensaje
+      entity.setNombre(insertar.Motivo());
+      entity.setMensaje(insertar.Mensaje());
+
+      // 4) Ejecutar INSERT con los 4 parámetros
+      int resultado = conexion.ejecutar(sql, ps -> {
+         try {
+            ps.setInt(1, entity.getFk_usuario());
+            ps.setInt(2, entity.getFk_empleado());
+            ps.setString(3, entity.getNombre());
+            ps.setString(4, entity.getMensaje());
+         } catch (SQLException e) {
+            throw new RuntimeException(e);
+         }
+      });
+
+      if (resultado > 0) {
+         JOptionPane.showMessageDialog(null, "La notificación fue enviada.");
+      } else {
+         JOptionPane.showMessageDialog(null, "No se pudo enviar la notificación.", "Error", JOptionPane.ERROR_MESSAGE);
+      }
+      return resultado;
+
+   } catch (Exception e) {
+      JOptionPane.showMessageDialog(null, "Ocurrió un fallo al procesar la notificación: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      e.printStackTrace();
+      return 0;
    }
+}
 
    // Método auxiliar que debe estar implementado en la clase
    private void seleccionar(String sql,
