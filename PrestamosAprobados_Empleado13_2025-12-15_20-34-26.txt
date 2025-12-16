@@ -1,0 +1,83 @@
+═══════════════════════════════════════════════════
+         PRÉSTAMOS APROBADOS POR EMPLEADO
+═══════════════════════════════════════════════════
+
+╔════════════════════════════════════════════════╗
+║  PRÉSTAMO #1
+╠════════════════════════════════════════════════╣
+  ID Préstamo      : 4
+  Número Préstamo  : PR-2025-521916
+  Nombre           : juan david
+  apellido         : quiñonez rojas
+  Documento Cliente: 1234562
+  Valor Préstamo   : $2.000.000,00
+  Valor Total      : $2.021.732,81
+  Valor Pendiente  : $2.021.732,81
+  Interés          : 2.0%
+  Cuotas           : 12
+  Fecha Inicio     : 2025-12-15
+  Fecha Límite     : 2026-12-15
+  Estado           : activo
+╚════════════════════════════════════════════════╝
+
+╔════════════════════════════════════════════════╗
+║  PRÉSTAMO #2
+╠════════════════════════════════════════════════╣
+  ID Préstamo      : 5
+  Número Préstamo  : 344714
+  Nombre           : juan david
+  apellido         : quiñonez rojas
+  Documento Cliente: 1234562
+  Valor Préstamo   : $2.000.000,00
+  Valor Total      : $2.021.732,81
+  Valor Pendiente  : $2.021.732,81
+  Interés          : 2.0%
+  Cuotas           : 12
+  Fecha Inicio     : 2025-12-15
+  Fecha Límite     : 2026-12-15
+  Estado           : activo
+╚════════════════════════════════════════════════╝
+
+╔════════════════════════════════════════════════╗
+║  PRÉSTAMO #3
+╠════════════════════════════════════════════════╣
+  ID Préstamo      : 6
+  Número Préstamo  : 157821
+  Nombre           : juan david
+  apellido         : quiñonez rojas
+  Documento Cliente: 1234562
+  Valor Préstamo   : $4.000.000,00
+  Valor Total      : $4.043.465,63
+  Valor Pendiente  : $4.043.465,63
+  Interés          : 2.0%
+  Cuotas           : 12
+  Fecha Inicio     : 2025-12-15
+  Fecha Límite     : 2026-12-15
+  Estado           : activo
+╚════════════════════════════════════════════════╝
+
+╔════════════════════════════════════════════════╗
+║  PRÉSTAMO #4
+╠════════════════════════════════════════════════╣
+  ID Préstamo      : 7
+  Número Préstamo  : 182569
+  Nombre           : juan david
+  apellido         : quiñonez rojas
+  Documento Cliente: 1234562
+  Valor Préstamo   : $20.000.000,00
+  Valor Total      : $21.058.267,09
+  Valor Pendiente  : $21.058.267,09
+  Interés          : 5.0%
+  Cuotas           : 24
+  Fecha Inicio     : 2025-12-15
+  Fecha Límite     : 2027-12-15
+  Estado           : activo
+╚════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════
+                     RESUMEN
+═══════════════════════════════════════════════════
+  Total de Préstamos Aprobados : 4
+  Suma Total Prestada          : $28.000.000,00
+  Total Pendiente              : $29.145.198,34
+═══════════════════════════════════════════════════
