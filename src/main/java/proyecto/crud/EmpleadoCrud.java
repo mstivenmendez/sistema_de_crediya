@@ -694,37 +694,5 @@ public int Actualizar(Empleado entity, String id, String campo) {
       JOptionPane.showMessageDialog(null, resultado.toString(), "Todos los Empleados", JOptionPane.INFORMATION_MESSAGE);
    }
 
-   /**
-    * Ejecuta la operación de listado según la opción seleccionada
-    * @param opcion número de la opción (1-7)
-    */
-   public void ejecutarOpcionListado(int opcion) {
-      switch (opcion) {
-         case 1:
-            filtrarPorSalarioMinimo();
-            break;
-         case 2:
-            ordenarPorNombre();
-            break;
-         case 3:
-            ordenarPorSalario();
-            break;
-         case 4:
-            limitarCantidadResultados();
-            break;
-         case 5:
-            mostrarSoloNombres();
-            break;
-         case 6:
-            filtrarActivosYOrdenar();
-            break;
-         case 7:
-            mostrarTodosLosEmpleados();
-            break;
-         default:
-            JOptionPane.showMessageDialog(null, "Opción no válida");
-            break;
-      }
-   }
 
 }
