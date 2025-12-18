@@ -411,3 +411,168 @@ DELIMITER ;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+
+select * from usuario;
+
+-- Insertar 3 usuarios con contraseña juanitO123*
+
+-- Usuario 1: Cliente
+INSERT INTO `crediya_db`.`usuario` 
+  (`correo`, `clave`, `estado`, `nombre_usuario`, `rol`) 
+VALUES 
+  ('juan.perez@email.com', 'juanitO123*', 'activo', 'juanperez', 'cliente');
+
+-- Información del Usuario 1
+INSERT INTO `crediya_db`.`informacion` 
+  (`usuario_id_fk`, `primer_nombre`, `segundo_nombre`, `primer_apellido`, `segundo_apellido`, `documento`, `telefono`, `salario`, `fecha_nacimiento`) 
+VALUES 
+  (LAST_INSERT_ID(), 'Juan', 'Carlos', 'Pérez', 'González', '1234567890', '3001234567', 2500000.00, '1990-05-15');
+
+
+-- Usuario 2: Empleado
+INSERT INTO `crediya_db`.`usuario` 
+  (`correo`, `clave`, `estado`, `nombre_usuario`, `rol`) 
+VALUES 
+  ('maria.rodriguez@crediya.com', 'juanitO123*', 'activo', 'mariarodriguez', 'empleado');
+
+-- Información del Usuario 2
+INSERT INTO `crediya_db`.`informacion` 
+  (`usuario_id_fk`, `primer_nombre`, `segundo_nombre`, `primer_apellido`, `segundo_apellido`, `documento`, `telefono`, `salario`, `fecha_nacimiento`) 
+VALUES 
+  (LAST_INSERT_ID(), 'María', 'Fernanda', 'Rodríguez', 'López', '9876543210', '3109876543', 3500000.00, '1988-08-22');
+
+
+-- Usuario 3: Cliente
+INSERT INTO `crediya_db`.`usuario` 
+  (`correo`, `clave`, `estado`, `nombre_usuario`, `rol`) 
+VALUES 
+  ('carlos.martinez@email.com', 'juanitO123*', 'activo', 'carlosmartinez', 'cliente');
+
+-- Información del Usuario 3
+INSERT INTO `crediya_db`.`informacion` 
+  (`usuario_id_fk`, `primer_nombre`, `segundo_nombre`, `primer_apellido`, `segundo_apellido`, `documento`, `telefono`, `salario`, `fecha_nacimiento`) 
+VALUES 
+  (LAST_INSERT_ID(), 'Carlos', 'Andrés', 'Martínez', 'Ramírez', '5551234567', '3205551234', 3000000.00, '1992-03-10');
+  
+  
+-- Insertar 10 empleados con contraseña empleadO123*
+
+-- Empleado 1: Ana Patricia Vargas Silva
+INSERT INTO `crediya_db`.`usuario` 
+  (`correo`, `clave`, `estado`, `nombre_usuario`, `rol`) 
+VALUES 
+  ('ana.vargas@crediya.com', 'empleadO123*', 'activo', 'anavargas', 'empleado');
+
+INSERT INTO `crediya_db`.`informacion` 
+  (`usuario_id_fk`, `primer_nombre`, `segundo_nombre`, `primer_apellido`, `segundo_apellido`, `documento`, `telefono`, `salario`, `fecha_nacimiento`) 
+VALUES 
+  (LAST_INSERT_ID(), 'Ana', 'Patricia', 'Vargas', 'Silva', '45678901', '3012345678', 2350000.00, '1991-04-12');
+
+
+-- Empleado 2: Diego Alejandro Mendoza Cruz
+INSERT INTO `crediya_db`.`usuario` 
+  (`correo`, `clave`, `estado`, `nombre_usuario`, `rol`) 
+VALUES 
+  ('diego.mendoza@crediya.com', 'empleadO123*', 'activo', 'diegomendoza', 'empleado');
+
+INSERT INTO `crediya_db`.`informacion` 
+  (`usuario_id_fk`, `primer_nombre`, `segundo_nombre`, `primer_apellido`, `segundo_apellido`, `documento`, `telefono`, `salario`, `fecha_nacimiento`) 
+VALUES 
+  (LAST_INSERT_ID(), 'Diego', 'Alejandro', 'Mendoza', 'Cruz', '1023456789', '3156789012', 4200000.00, '1987-09-20');
+
+
+-- Empleado 3: Carolina Fernanda Ríos Mora
+INSERT INTO `crediya_db`.`usuario` 
+  (`correo`, `clave`, `estado`, `nombre_usuario`, `rol`) 
+VALUES 
+  ('carolina.rios@crediya.com', 'empleadO123*', 'activo', 'carolinarios', 'empleado');
+
+INSERT INTO `crediya_db`.`informacion` 
+  (`usuario_id_fk`, `primer_nombre`, `segundo_nombre`, `primer_apellido`, `segundo_apellido`, `documento`, `telefono`, `salario`, `fecha_nacimiento`) 
+VALUES 
+  (LAST_INSERT_ID(), 'Carolina', 'Fernanda', 'Ríos', 'Mora', '8765432', '3209876543', 3100000.00, '1993-02-28');
+
+
+-- Empleado 4: Roberto José Castillo Vega
+INSERT INTO `crediya_db`.`usuario` 
+  (`correo`, `clave`, `estado`, `nombre_usuario`, `rol`) 
+VALUES 
+  ('roberto.castillo@crediya.com', 'empleadO123*', 'activo', 'robertocastillo', 'empleado');
+
+INSERT INTO `crediya_db`.`informacion` 
+  (`usuario_id_fk`, `primer_nombre`, `segundo_nombre`, `primer_apellido`, `segundo_apellido`, `documento`, `telefono`, `salario`, `fecha_nacimiento`) 
+VALUES 
+  (LAST_INSERT_ID(), 'Roberto', 'José', 'Castillo', 'Vega', '1098765432', '3134567890', 4750000.00, '1985-07-15');
+
+
+-- Empleado 5: Liliana Andrea Morales Ortiz
+INSERT INTO `crediya_db`.`usuario` 
+  (`correo`, `clave`, `estado`, `nombre_usuario`, `rol`) 
+VALUES 
+  ('liliana.morales@crediya.com', 'empleadO123*', 'activo', 'lilianamorales', 'empleado');
+
+INSERT INTO `crediya_db`.`informacion` 
+  (`usuario_id_fk`, `primer_nombre`, `segundo_nombre`, `primer_apellido`, `segundo_apellido`, `documento`, `telefono`, `salario`, `fecha_nacimiento`) 
+VALUES 
+  (LAST_INSERT_ID(), 'Liliana', 'Andrea', 'Morales', 'Ortiz', '52341678', '3178901234', 2800000.00, '1994-11-05');
+
+
+-- Empleado 6: Andrés Felipe Torres Jiménez
+INSERT INTO `crediya_db`.`usuario` 
+  (`correo`, `clave`, `estado`, `nombre_usuario`, `rol`) 
+VALUES 
+  ('andres.torres@crediya.com', 'empleadO123*', 'activo', 'andrestorres', 'empleado');
+
+INSERT INTO `crediya_db`.`informacion` 
+  (`usuario_id_fk`, `primer_nombre`, `segundo_nombre`, `primer_apellido`, `segundo_apellido`, `documento`, `telefono`, `salario`, `fecha_nacimiento`) 
+VALUES 
+  (LAST_INSERT_ID(), 'Andrés', 'Felipe', 'Torres', 'Jiménez', '1087654321', '3192345678', 3650000.00, '1989-06-18');
+
+
+-- Empleado 7: Sandra Milena Reyes Díaz
+INSERT INTO `crediya_db`.`usuario` 
+  (`correo`, `clave`, `estado`, `nombre_usuario`, `rol`) 
+VALUES 
+  ('sandra.reyes@crediya.com', 'empleadO123*', 'activo', 'sandrareyes', 'empleado');
+
+INSERT INTO `crediya_db`.`informacion` 
+  (`usuario_id_fk`, `primer_nombre`, `segundo_nombre`, `primer_apellido`, `segundo_apellido`, `documento`, `telefono`, `salario`, `fecha_nacimiento`) 
+VALUES 
+  (LAST_INSERT_ID(), 'Sandra', 'Milena', 'Reyes', 'Díaz', '39876543', '3165432109', 2500000.00, '1992-01-22');
+
+
+-- Empleado 8: Javier Augusto Parra Suárez
+INSERT INTO `crediya_db`.`usuario` 
+  (`correo`, `clave`, `estado`, `nombre_usuario`, `rol`) 
+VALUES 
+  ('javier.parra@crediya.com', 'empleadO123*', 'activo', 'javierparra', 'empleado');
+
+INSERT INTO `crediya_db`.`informacion` 
+  (`usuario_id_fk`, `primer_nombre`, `segundo_nombre`, `primer_apellido`, `segundo_apellido`, `documento`, `telefono`, `salario`, `fecha_nacimiento`) 
+VALUES 
+  (LAST_INSERT_ID(), 'Javier', 'Augusto', 'Parra', 'Suárez', '1076543210', '3143210987', 4950000.00, '1986-08-09');
+
+
+-- Empleado 9: Paola Cristina Navarro Gil
+INSERT INTO `crediya_db`.`usuario` 
+  (`correo`, `clave`, `estado`, `nombre_usuario`, `rol`) 
+VALUES 
+  ('paola.navarro@crediya.com', 'empleadO123*', 'activo', 'paolanavarro', 'empleado');
+
+INSERT INTO `crediya_db`.`informacion` 
+  (`usuario_id_fk`, `primer_nombre`, `segundo_nombre`, `primer_apellido`, `segundo_apellido`, `documento`, `telefono`, `salario`, `fecha_nacimiento`) 
+VALUES 
+  (LAST_INSERT_ID(), 'Paola', 'Cristina', 'Navarro', 'Gil', '63217890', '3187654321', 3300000.00, '1990-12-14');
+
+
+-- Empleado 10: Miguel Ángel Sánchez Peña
+INSERT INTO `crediya_db`.`usuario` 
+  (`correo`, `clave`, `estado`, `nombre_usuario`, `rol`) 
+VALUES 
+  ('miguel.sanchez@crediya.com', 'empleadO123*', 'activo', 'miguelsanchez', 'empleado');
+
+INSERT INTO `crediya_db`.`informacion` 
+  (`usuario_id_fk`, `primer_nombre`, `segundo_nombre`, `primer_apellido`, `segundo_apellido`, `documento`, `telefono`, `salario`, `fecha_nacimiento`) 
+VALUES 
+  (LAST_INSERT_ID(), 'Miguel', 'Ángel', 'Sánchez', 'Peña', '1054321098', '3201234567', 2100000.00, '1995-03-07');

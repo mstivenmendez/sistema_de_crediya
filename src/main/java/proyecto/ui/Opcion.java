@@ -122,6 +122,9 @@ public class Opcion {
                case 6:
                   reportes.buscarMisNotificaciones();
                   break;
+               case 7:
+                  VistaEmpleadosListadosOpcion();
+                  break;
             }
             // Pedir siguiente opción
             valor = numero.solicitarEntero(ingreso.VistaUsuario(), 7);
@@ -342,6 +345,44 @@ public class Opcion {
             reportes.notificacionPersonalizada(notificacion, sqlInsertNotificacion);
             break;
          
+      }
+   }
+
+
+   public void VistaEmpleadosListadosOpcion() {
+      boolean continuarListados = true;
+      while (continuarListados) {
+         Integer opcion = numero.solicitarEntero(ingreso.VistaEmpleadosListados(), 7);
+         if (opcion == null) continue;
+         
+         if (opcion == 0) {
+            JOptionPane.showMessageDialog(null, "Regresando al menú anterior...");
+            continuarListados = false;
+         } else {
+            switch (opcion) {
+               case 1:
+                  empleadoCrud.filtrarPorSalarioMinimo();
+                  break;
+               case 2:
+                  empleadoCrud.ordenarPorNombre();
+                  break;
+               case 3:
+                  empleadoCrud.ordenarPorSalario();
+                  break;
+               case 4:
+                  empleadoCrud.limitarCantidadResultados();
+                  break;
+               case 5:
+                  empleadoCrud.mostrarSoloNombres();
+                  break;
+               case 6:
+                  empleadoCrud.filtrarActivosYOrdenar();
+                  break;
+               case 7:
+                  empleadoCrud.mostrarTodosLosEmpleados();
+                  break;
+            }
+         }
       }
    }
 

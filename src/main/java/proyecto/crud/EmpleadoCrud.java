@@ -9,7 +9,10 @@ import java.time.format.DateTimeFormatter;
 import java.io.FileWriter;
 import java.io.IOException;
 import javax.swing.JOptionPane;
+import proyecto.excepciones.DatosVaciosException;
+import proyecto.excepciones.ValidacionException;
 import proyecto.personal.Empleado;
+import proyecto.prestamo.Estado;
 import proyecto.solicitud.Datos;
 import proyecto.util.IngresoDatos;
 import proyecto.validaciones.Validacion;
@@ -408,6 +411,319 @@ public int Actualizar(Empleado entity, String id, String campo) {
                "Error al generar el archivo: " + e.getMessage(),
                "Error",
                JOptionPane.ERROR_MESSAGE);
+      }
+   }
+
+   /**
+    * Método auxiliar para obtener la lista de empleados desde la BD
+    */
+   private java.util.List<Empleado> obtenerListaEmpleados() {
+      String sql = "SELECT * FROM vista_empleados WHERE rol = 'empleado'";
+      final java.util.List<Empleado> empleados = new java.util.ArrayList<>();
+      
+      conexion.seleccionar(sql, rs -> {
+         try {
+            while (rs.next()) {
+               Empleado emp = new Empleado(
+                  rs.getString("primer_nombre"),
+                  rs.getString("segundo_nombre"),
+                  rs.getString("primer_apellido"),
+                  rs.getString("segundo_apellido"),
+                  rs.getString("correo"),
+                  rs.getString("telefono"),
+                  rs.getString("documento"),
+                  rs.getDate("fecha_nacimiento").toLocalDate(),
+                  rs.getInt("usuario_id"),
+                  rs.getString("rol"),
+                  rs.getDouble("salario"),
+                  rs.getString("nombre_usuario"),
+                  "", // contraseña no se muestra
+                  rs.getString("estado").equalsIgnoreCase("activo") ? Estado.activo : Estado.inactivo,
+                  rs.getDate("fecha_registro").toLocalDate()
+               );
+               empleados.add(emp);
+            }
+         } catch (SQLException e) {
+            e.printStackTrace();
+         }
+      }, ps -> {});
+      
+      return empleados;
+   }
+
+   /**
+    * Opción 1: Filtrar empleados por salario mínimo usando filter()
+    * @throws DatosVaciosException si no hay empleados registrados
+    */
+   public void filtrarPorSalarioMinimo() {
+      try {
+         java.util.List<Empleado> empleados = obtenerListaEmpleados();
+         
+         // Lanzar excepción personalizada si no hay datos
+         if (empleados.isEmpty()) {
+            throw new DatosVaciosException(
+               "No hay empleados registrados en el sistema.\n\n" +
+               "Por favor, registre empleados primero desde:\n" +
+               "Menú Administrador → Gestión de Empleados → Registrar empleado",
+               "Empleado",
+               1
+            );
+         }
+         
+         String salarioMin = JOptionPane.showInputDialog("Ingrese salario mínimo:");
+         if (salarioMin == null) return;
+         
+         // Validar que sea un número válido
+         double minSalario;
+         try {
+            minSalario = Double.parseDouble(salarioMin);
+            if (minSalario < 0) {
+               throw new ValidacionException(
+                  "El salario mínimo no puede ser negativo",
+                  "salarioMinimo",
+                  salarioMin
+               );
+            }
+         } catch (NumberFormatException e) {
+            throw new ValidacionException(
+               "Debe ingresar un valor numérico válido para el salario",
+               "salarioMinimo",
+               salarioMin
+            );
+         }
+         
+         StringBuilder resultado = new StringBuilder();
+         resultado.append("═══════════════════════════════════════════════\n");
+         resultado.append("  EMPLEADOS CON SALARIO >= $").append(String.format("%,.2f", minSalario)).append("\n");
+         resultado.append("═══════════════════════════════════════════════\n\n");
+         
+         long count = empleados.stream()
+            .filter(e -> e.getSueldo() >= minSalario)
+            .peek(e -> {
+               resultado.append("• ").append(e.getNombre()).append(" ")
+                  .append(e.getApellido()).append(" - $")
+                  .append(String.format("%,.2f", e.getSueldo())).append("\n");
+            })
+            .count();
+         
+         if (count == 0) {
+            resultado.append("No se encontraron empleados con salario >= $")
+               .append(String.format("%,.2f", minSalario));
+         }
+         
+         resultado.append("\n═══════════════════════════════════════════════");
+         JOptionPane.showMessageDialog(null, resultado.toString(), 
+            "Filtrar por Salario", JOptionPane.INFORMATION_MESSAGE);
+            
+      } catch (DatosVaciosException e) {
+         JOptionPane.showMessageDialog(null, 
+            e.getMessage(),
+            "Sin Datos - " + e.getTipoEntidad(),
+            JOptionPane.WARNING_MESSAGE);
+      } catch (ValidacionException e) {
+         JOptionPane.showMessageDialog(null,
+            e.getMessage() + "\n\nCampo: " + e.getCampo() + "\nValor ingresado: " + e.getValorInvalido(),
+            "Error de Validación",
+            JOptionPane.ERROR_MESSAGE);
+      }
+   }
+
+   /**
+    * Opción 2: Ordenar empleados por nombre usando sorted()
+    */
+   public void ordenarPorNombre() {
+      java.util.List<Empleado> empleados = obtenerListaEmpleados();
+      if (empleados.isEmpty()) {
+         JOptionPane.showMessageDialog(null, "No hay empleados registrados.");
+         return;
+      }
+      
+      StringBuilder resultado = new StringBuilder();
+      resultado.append("═══════════════════════════════════════════════\n");
+      resultado.append("  EMPLEADOS ORDENADOS ALFABÉTICAMENTE\n");
+      resultado.append("═══════════════════════════════════════════════\n\n");
+      
+      empleados.stream()
+         .sorted((e1, e2) -> e1.getNombre().compareToIgnoreCase(e2.getNombre()))
+         .forEach(e -> {
+            resultado.append("• ").append(e.getNombre()).append(" ")
+               .append(e.getApellido()).append(" - ")
+               .append(e.getUsuario()).append("\n");
+         });
+      
+      resultado.append("\n═══════════════════════════════════════════════");
+      JOptionPane.showMessageDialog(null, resultado.toString(), "Ordenar por Nombre", JOptionPane.INFORMATION_MESSAGE);
+   }
+
+   /**
+    * Opción 3: Ordenar empleados por salario usando sorted()
+    */
+   public void ordenarPorSalario() {
+      java.util.List<Empleado> empleados = obtenerListaEmpleados();
+      if (empleados.isEmpty()) {
+         JOptionPane.showMessageDialog(null, "No hay empleados registrados.");
+         return;
+      }
+      
+      StringBuilder resultado = new StringBuilder();
+      resultado.append("═══════════════════════════════════════════════\n");
+      resultado.append("  EMPLEADOS ORDENADOS POR SALARIO (MAYOR A MENOR)\n");
+      resultado.append("═══════════════════════════════════════════════\n\n");
+      
+      empleados.stream()
+         .sorted((e1, e2) -> Double.compare(e2.getSueldo(), e1.getSueldo()))
+         .forEach(e -> {
+            resultado.append("• ").append(e.getNombre()).append(" ")
+               .append(e.getApellido()).append(" - $")
+               .append(String.format("%,.2f", e.getSueldo())).append("\n");
+         });
+      
+      resultado.append("\n═══════════════════════════════════════════════");
+      JOptionPane.showMessageDialog(null, resultado.toString(), "Ordenar por Salario", JOptionPane.INFORMATION_MESSAGE);
+   }
+
+   /**
+    * Opción 4: Limitar cantidad de resultados usando limit()
+    */
+   public void limitarCantidadResultados() {
+      java.util.List<Empleado> empleados = obtenerListaEmpleados();
+      if (empleados.isEmpty()) {
+         JOptionPane.showMessageDialog(null, "No hay empleados registrados.");
+         return;
+      }
+      
+      String cantidad = JOptionPane.showInputDialog("¿Cuántos empleados mostrar?");
+      if (cantidad == null) return;
+      
+      int limite = Integer.parseInt(cantidad);
+      StringBuilder resultado = new StringBuilder();
+      resultado.append("═══════════════════════════════════════════════\n");
+      resultado.append("  PRIMEROS ").append(limite).append(" EMPLEADOS\n");
+      resultado.append("═══════════════════════════════════════════════\n\n");
+      
+      empleados.stream()
+         .limit(limite)
+         .forEach(e -> {
+            resultado.append("• ").append(e.getNombre()).append(" ")
+               .append(e.getApellido()).append(" - ")
+               .append(e.getCorreo()).append("\n");
+         });
+      
+      resultado.append("\n═══════════════════════════════════════════════");
+      JOptionPane.showMessageDialog(null, resultado.toString(), "Limitar Resultados", JOptionPane.INFORMATION_MESSAGE);
+   }
+
+   /**
+    * Opción 5: Mostrar solo nombres usando map() y distinct()
+    */
+   public void mostrarSoloNombres() {
+      java.util.List<Empleado> empleados = obtenerListaEmpleados();
+      if (empleados.isEmpty()) {
+         JOptionPane.showMessageDialog(null, "No hay empleados registrados.");
+         return;
+      }
+      
+      StringBuilder resultado = new StringBuilder();
+      resultado.append("═══════════════════════════════════════════════\n");
+      resultado.append("  LISTA DE NOMBRES DE EMPLEADOS\n");
+      resultado.append("═══════════════════════════════════════════════\n\n");
+      
+      empleados.stream()
+         .map(e -> e.getNombre() + " " + e.getApellido())
+         .distinct()
+         .forEach(nombre -> resultado.append("• ").append(nombre).append("\n"));
+      
+      resultado.append("\n═══════════════════════════════════════════════");
+      JOptionPane.showMessageDialog(null, resultado.toString(), "Lista de Nombres", JOptionPane.INFORMATION_MESSAGE);
+   }
+
+   /**
+    * Opción 6: Filtrar activos y ordenar - Combinación de filter, sorted y limit
+    */
+   public void filtrarActivosYOrdenar() {
+      java.util.List<Empleado> empleados = obtenerListaEmpleados();
+      if (empleados.isEmpty()) {
+         JOptionPane.showMessageDialog(null, "No hay empleados registrados.");
+         return;
+      }
+      
+      StringBuilder resultado = new StringBuilder();
+      resultado.append("═══════════════════════════════════════════════\n");
+      resultado.append("  TOP 5 EMPLEADOS ACTIVOS CON MAYOR SALARIO\n");
+      resultado.append("═══════════════════════════════════════════════\n\n");
+      
+      empleados.stream()
+         .filter(e -> e.getEstado() == Estado.activo)
+         .sorted((e1, e2) -> Double.compare(e2.getSueldo(), e1.getSueldo()))
+         .limit(5)
+         .forEach(e -> {
+            resultado.append("• ").append(e.getNombre()).append(" ")
+               .append(e.getApellido()).append("\n")
+               .append("  Salario: $").append(String.format("%,.2f", e.getSueldo())).append("\n")
+               .append("  Usuario: ").append(e.getUsuario()).append("\n\n");
+         });
+      
+      resultado.append("═══════════════════════════════════════════════");
+      JOptionPane.showMessageDialog(null, resultado.toString(), "Top Empleados Activos", JOptionPane.INFORMATION_MESSAGE);
+   }
+
+   /**
+    * Opción 7: Mostrar todos los empleados usando map()
+    */
+   public void mostrarTodosLosEmpleados() {
+      java.util.List<Empleado> empleados = obtenerListaEmpleados();
+      if (empleados.isEmpty()) {
+         JOptionPane.showMessageDialog(null, "No hay empleados registrados.");
+         return;
+      }
+      
+      StringBuilder resultado = new StringBuilder();
+      resultado.append("═══════════════════════════════════════════════\n");
+      resultado.append("  TODOS LOS EMPLEADOS\n");
+      resultado.append("═══════════════════════════════════════════════\n\n");
+      
+      empleados.stream()
+         .map(e -> String.format("• %s %s - Usuario: %s - Salario: $%,.2f",
+            e.getNombre(), e.getApellido(), e.getUsuario(), e.getSueldo()))
+         .forEach(info -> resultado.append(info).append("\n"));
+      
+      resultado.append("\n═══════════════════════════════════════════════\n");
+      resultado.append("Total: ").append(empleados.size()).append(" empleados\n");
+      resultado.append("═══════════════════════════════════════════════");
+      
+      JOptionPane.showMessageDialog(null, resultado.toString(), "Todos los Empleados", JOptionPane.INFORMATION_MESSAGE);
+   }
+
+   /**
+    * Ejecuta la operación de listado según la opción seleccionada
+    * @param opcion número de la opción (1-7)
+    */
+   public void ejecutarOpcionListado(int opcion) {
+      switch (opcion) {
+         case 1:
+            filtrarPorSalarioMinimo();
+            break;
+         case 2:
+            ordenarPorNombre();
+            break;
+         case 3:
+            ordenarPorSalario();
+            break;
+         case 4:
+            limitarCantidadResultados();
+            break;
+         case 5:
+            mostrarSoloNombres();
+            break;
+         case 6:
+            filtrarActivosYOrdenar();
+            break;
+         case 7:
+            mostrarTodosLosEmpleados();
+            break;
+         default:
+            JOptionPane.showMessageDialog(null, "Opción no válida");
+            break;
       }
    }
 
