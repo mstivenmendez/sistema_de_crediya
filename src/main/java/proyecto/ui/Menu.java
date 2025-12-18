@@ -40,9 +40,10 @@ public class Menu {
                   + "4. Realizar un pago 🧾💳\n"
                   + "5. Simulacion Prestamo 🔁🔄\n"
                   + "6. Reportes (notificaciones) 🔔 \n"
+                  + "7. Empleados Listados � \n"
                   + "0. Cerrar Sesion 🔙\n");
       return ingreso;
-   }
+   } 
 
    public String VistaAdministrador() {
 
@@ -132,4 +133,18 @@ public class Menu {
       return ingreso;
    }
 
+   public String VistaEmpleadosListados() {
+      String ingreso = JOptionPane.showInputDialog(null,
+            " 🏦💰 SISTEMA DE COBROS DE CARTERA 💰🏦 \n"
+                  + " 🏦💰 Listado de Empleados 💰🏦 \n"
+                  + "1. Filtrar por salario mínimo 💵\n"
+                  + "2. Ordenar por nombre 📝\n"
+                  + "3. Ordenar por salario 💰\n"
+                  + "4. Limitar cantidad de resultados 🔢\n"
+                  + "5. Mostrar solo nombres (map) 👤\n"
+                  + "6. Filtrar activos y ordenar ⭐\n"
+                  + "7. Mostrar todo 📋\n"
+                  + "0. Volver 🔙\n");
+      return ingreso;
+   }
 }

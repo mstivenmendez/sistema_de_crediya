@@ -61,7 +61,10 @@ COLLATE = utf8mb4_0900_ai_ci;
 -- -----------------------------------------------------
 -- Table `crediya_db`.`notificacion`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `notificacion` (
+-- -----------------------------------------------------
+-- Table `crediya_db`.`notificacion`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `crediya_db`.`notificacion` (
   `notificacion_id` INT NOT NULL AUTO_INCREMENT,
   `fk_usuario` INT NOT NULL,
   `fk_empleado` INT DEFAULT NULL,
@@ -71,18 +74,17 @@ CREATE TABLE IF NOT EXISTS `notificacion` (
   `estado` ENUM('pendiente','enviada','leida') NOT NULL DEFAULT 'pendiente',
   PRIMARY KEY (`notificacion_id`),
   INDEX `idx_notificacion_fk_usuario` (`fk_usuario`),
-  INDEX `idx_notificacion_fk_empleado` (`fk_empleado`)
-  -- Si tu tabla de usuarios se llama 'usuario' y la PK 'usuario_id', puedes activar las FK:
-  -- ,CONSTRAINT `fk_notif_usuario` FOREIGN KEY (`fk_usuario`) REFERENCES `usuario`(`usuario_id`) ON DELETE CASCADE ON UPDATE CASCADE
-  -- ,CONSTRAINT `fk_notif_empleado` FOREIGN KEY (`fk_empleado`) REFERENCES `usuario`(`usuario_id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-da') NOT NULL DEFAULT 'pendiente',
-  PRIMARY KEY (`notificacion_id`),
-  INDEX `idx_notificacion_fk_usuario` (`fk_usuario`),
-  INDEX `idx_notificacion_fk_empleado` (`fk_empleado`)
-  -- Si tu tabla de usuarios se llama 'usuario' y la PK 'usuario_id', puedes activar las FK:
-  -- ,CONSTRAINT `fk_notif_usuario` FOREIGN KEY (`fk_usuario`) REFERENCES `usuario`(`usuario_id`) ON DELETE CASCADE ON UPDATE CASCADE
-  -- ,CONSTRAINT `fk_notif_empleado` FOREIGN KEY (`fk_empleado`) REFERENCES `usuario`(`usuario_id`) ON DELETE SET NULL ON UPDATE CASCADE
+  INDEX `idx_notificacion_fk_empleado` (`fk_empleado`),
+  CONSTRAINT `fk_notif_usuario` 
+    FOREIGN KEY (`fk_usuario`) 
+    REFERENCES `crediya_db`.`usuario`(`usuario_id`) 
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_notif_empleado` 
+    FOREIGN KEY (`fk_empleado`) 
+    REFERENCES `crediya_db`.`usuario`(`usuario_id`) 
+    ON DELETE SET NULL 
+    ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
