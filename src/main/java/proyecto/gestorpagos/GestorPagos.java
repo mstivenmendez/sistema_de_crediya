@@ -11,17 +11,21 @@ import java.time.format.DateTimeFormatter;
 
 import javax.swing.JOptionPane;
 
+import com.mysql.cj.x.protobuf.MysqlxCrud.Insert;
+
 import proyecto.crud.CrudEntity;
 import proyecto.exception.PrestamoNoEncontrado;
 import proyecto.prestamo.Prestamo;
 import proyecto.solicitud.Datos;
 import proyecto.util.IngresoDatos;
+import proyecto.validaciones.ValidarNumero;
 
 public class GestorPagos extends Prestamo implements CrudEntity<pagos>{
 
     IngresoDatos consultar = new IngresoDatos();
     PrestamoNoEncontrado fallo = new PrestamoNoEncontrado();
     Datos insertar = new Datos();
+    ValidarNumero validar = new ValidarNumero();
 
     public boolean BuscarPrestamoId(String numero) throws PrestamoNoEncontrado {
 
@@ -388,8 +392,27 @@ public class GestorPagos extends Prestamo implements CrudEntity<pagos>{
 
     @Override
     public int Guardar(pagos entity, String dato) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'Guardar'");
+        try {
+
+            entity.setMonton(validar.solicitarDouble(insertar.PagarCuota(),800000000));
+
+   
+            if ( BuscarPrestamoId(entity.getMonton())) {
+               JOptionPane.showMessageDialog(null, "Error de validación: datos de usuario inválidos.");
+               return 0;
+            }
+   
+            // PASO 2: Insertar en tabla usuario y obtener el ID generado
+        
+   
+         } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+               "Error al guardar el cliente: " + e.getMessage(),
+               "Error",
+               JOptionPane.ERROR_MESSAGE);
+            return 0;
+         }
     }
 
     @Override
